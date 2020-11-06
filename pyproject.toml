@@ -1,8 +1,12 @@
 [tool.poetry]
 name = "manabase"
 version = "0.1.0"
-description = ""
+description = "Manabase generator for all your Magic: The Gathering needs."
+license = "MIT"
 authors = ["Aphosis <aphosis.github@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/Aphosis/manabase"
+repository = "https://github.com/Aphosis/manabase"
 
 [tool.poetry.scripts]
 manabase = 'manabase:manabase'
