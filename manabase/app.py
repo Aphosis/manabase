@@ -1,12 +1,15 @@
 """CLI."""
-from typing import List, Optional
-
 import typer
 
 from .client import Client
 from .colors import Color
-from .cycles import Cycle
-from .filters import CycleFilter, ProvideColorFilter
+from .filters.colors import BasicLandReferencedFilter, ProducedManaFilter
+from .filters.lands.battle import BattleLandFilter
+from .filters.lands.check import CheckLandFilter
+from .filters.lands.fetch import FetchLandFilter
+from .filters.lands.original import OriginalDualLandFilter
+from .filters.lands.reveal import RevealLandFilter
+from .filters.lands.shock import ShockLandFilter
 
 manabase = typer.Typer()
 
@@ -16,12 +19,9 @@ def generate(
     colors: str,
     _count: int = 23,
     _maximum: int = 4,
-    ignore_colors: Optional[List[Cycle]] = None,
 ):
     """Generate a manabase."""
     color_list = Color.from_string(colors)
-
-    cycles = Cycle.default()
 
     # TODO: Once land filters are actual filters, filters should return a list
     # of ``FilteredCard`` instead of simple ``Card``s.
@@ -29,10 +29,23 @@ def generate(
     # and can ignore the card, for example the ``ProvideColorFilter``
     # will ignore cards coming from a land filter with ``ignore_colors`` on.
     # HACK: Until then, we'll just pretend it works.
-    filters = [
-        ProvideColorFilter(*color_list),
-        CycleFilter(color_list, cycles, ignore_colors),
-    ]
+    filters = (
+        ProducedManaFilter(color_list)
+        & (
+            OriginalDualLandFilter()
+            | ShockLandFilter()
+            | BattleLandFilter()
+            | CheckLandFilter()
+            | RevealLandFilter()
+        )
+    ) | (
+        BasicLandReferencedFilter(
+            color_list,
+            exclusive=False,
+            minimum_count=1,
+        )
+        & FetchLandFilter()
+    )
 
     client = Client()
 

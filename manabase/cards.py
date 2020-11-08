@@ -13,7 +13,7 @@ from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
 
 @total_ordering
-class Card(BaseModel):  # pylint: disable=too-few-public-methods
+class Card(BaseModel):
     """A single card data.
 
     Only relevant data is shown here, and is parsed from a scryfall API response.

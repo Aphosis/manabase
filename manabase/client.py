@@ -5,7 +5,7 @@ import requests
 from pydantic import ValidationError
 
 from .cards import Card
-from .filters import BaseFilter
+from .filters.filter import Filter
 
 
 class Client:
@@ -22,18 +22,16 @@ class Client:
         Example::
 
         ```python
-        >>> from manabase import Client
+        >>> from manabase.client import Client
         >>> client = Client()
         >>> client.route("cards/search")
         'https://api.scryfall.com/cards/search'
         """
         return "/".join([self.api_url, path])
 
-    def fetch(self, filters: List[BaseFilter]) -> List[Card]:
+    def fetch(self, filters: Filter) -> List[Card]:
         """Fetch a filtered list of cards."""
-        queries = list(filter(None, [f.query() for f in filters]))
-        queries.append("t:land")
-        query = " ".join(queries)
+        query = "t:land"
         page = 1
 
         models, has_next_page = self._fetch_cards(query, page)
@@ -43,11 +41,10 @@ class Client:
             models.extend(_models)
 
         cards = set()
-        for filter_ in filters:
-            if not cards:
-                cards.update(filter_.filter_cards(models))
-            else:
-                cards.intersection_update(filter_.filter_cards(models))
+        for model in models:
+            if not filters.filter_value(model):
+                continue
+            cards.add(model)
 
         return list(cards)
 

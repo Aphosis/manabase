@@ -8,7 +8,7 @@ method.
 Example::
 
 ```python
->>> from manabase import Color
+>>> from manabase.colors import Color
 >>> Color.from_string("w")
 [<Color.white: 'W'>]
 
@@ -19,7 +19,7 @@ This method is case insensitive to work with most APIs by default.
 Example::
 
 ```python
->>> from manabase import Color
+>>> from manabase.colors import Color
 >>> Color.from_string("wUb")
 [<Color.white: 'W'>, <Color.blue: 'U'>, <Color.black: 'B'>]
 
@@ -74,7 +74,7 @@ class Color(Enum):
         Examples::
 
         ```python
-        >>> from manabase import Color
+        >>> from manabase.colors import Color
         >>> Color.to_string(Color.white, Color.blue, Color.black)
         'WUB'
 
@@ -103,7 +103,7 @@ class Color(Enum):
         Example::
 
         ```python
-        >>> from manabase import Color
+        >>> from manabase.colors import Color
         >>> Color.dual_combinations([Color.white, Color.blue, Color.black])
         [(<Color.white: 'W'>, <Color.blue: 'U'>), (<Color.white: 'W'>, \
 <Color.black: 'B'>), (<Color.blue: 'U'>, <Color.black: 'B'>)]
