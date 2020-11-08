@@ -23,12 +23,6 @@ def generate(
     """Generate a manabase."""
     color_list = Color.from_string(colors)
 
-    # TODO: Once land filters are actual filters, filters should return a list
-    # of ``FilteredCard`` instead of simple ``Card``s.
-    # This way, the next filter will know the filter that let the card in,
-    # and can ignore the card, for example the ``ProvideColorFilter``
-    # will ignore cards coming from a land filter with ``ignore_colors`` on.
-    # HACK: Until then, we'll just pretend it works.
     filters = (
         ProducedManaFilter(color_list)
         & (

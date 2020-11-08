@@ -15,6 +15,7 @@ class LandFilter(CompositeFilter):
         self._regex = re.compile(self._process_pattern(pattern))
 
     def filter_value(self, value: Card) -> bool:
+        # TODO: Filter by extension first ?
         return bool(self._regex.match(value.oracle_text))
 
     @staticmethod
