@@ -2,8 +2,6 @@
 from inspect import Parameter, signature
 from typing import TypeVar
 
-# TODO: Unit tests
-
 ObjectType = TypeVar("ObjectType")
 
 
