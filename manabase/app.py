@@ -1,6 +1,9 @@
 """CLI."""
+from typing import Optional
+
 import typer
 
+from .cache import CacheManager
 from .client import Client
 from .colors import Color
 from .filters.colors import BasicLandReferencedFilter, ProducedManaFilter
@@ -19,6 +22,7 @@ def generate(
     colors: str,
     _count: int = 23,
     _maximum: int = 4,
+    clear_cache: Optional[bool] = False,
 ):
     """Generate a manabase."""
     color_list = Color.from_string(colors)
@@ -41,14 +45,27 @@ def generate(
         & FetchLandFilter()
     )
 
-    client = Client()
+    cache = CacheManager()
 
-    # TODO: #2 Cache the query results, it takes forever.
-    # TODO: #3 Split data fetching from scryfall and filtering, `Client.fetch`
-    # should not do both. `Client` should not know about filters.
+    if clear_cache or not cache.has_cache():
+
+        client = Client()
+
+        # TODO: #5 Multithread that part, it takes longer than forever.
+        models = client.fetch()
+
+        cache.write_cache(models)
+
+    else:
+        models = cache.read_cache()
+
     # TODO: #1 Cache filtering results. It should be invalidated if the query
     # cache is invalidated.
-    cards = client.fetch(filters)
+    cards = set()
+    for model in models:
+        if not filters.filter_value(model):
+            continue
+        cards.add(model)
 
     print("\n".join([card.name for card in sorted(cards)]))
 

@@ -1,8 +1,8 @@
 """Manabase generator for all your Magic: The Gathering needs."""
-__version__ = "0.1.0"
-
 from .app import manabase
+from .version import __version__
 
 __all__ = [
+    "__version__",
     "manabase",
 ]

@@ -5,7 +5,6 @@ import requests
 from pydantic import ValidationError
 
 from .cards import Card
-from .filters.filter import Filter
 
 
 class Client:
@@ -29,7 +28,7 @@ class Client:
         """
         return "/".join([self.api_url, path])
 
-    def fetch(self, filters: Filter) -> List[Card]:
+    def fetch(self) -> List[Card]:
         """Fetch a filtered list of cards."""
         query = "t:land"
         page = 1
@@ -40,13 +39,7 @@ class Client:
             _models, has_next_page = self._fetch_cards(query, page)
             models.extend(_models)
 
-        cards = set()
-        for model in models:
-            if not filters.filter_value(model):
-                continue
-            cards.add(model)
-
-        return list(cards)
+        return models
 
     def _fetch_cards(self, query: str, page: int) -> Tuple[List[Card], bool]:
         params = {"q": query, "page": page}
