@@ -3,6 +3,8 @@ from typing import Optional
 
 import typer
 
+from manabase.parser import parse_filter_string
+
 from .cache import CacheManager
 from .client import Client
 from .colors import Color
@@ -20,6 +22,7 @@ manabase = typer.Typer()
 @manabase.command()
 def generate(
     colors: str,
+    filters: Optional[str] = None,
     _count: int = 23,
     _maximum: int = 4,
     clear_cache: Optional[bool] = False,
@@ -32,23 +35,26 @@ def generate(
     # TODO: #10 Manage priorities when reaching the lands limit.
     color_list = Color.from_string(colors)
 
-    filters = (
-        ProducedManaFilter(color_list)
-        & (
-            OriginalDualLandFilter()
-            | ShockLandFilter()
-            | BattleLandFilter()
-            | CheckLandFilter()
-            | RevealLandFilter()
+    if filters is not None:
+        filter_tree = parse_filter_string(filters, color_list)
+    else:
+        filter_tree = (
+            ProducedManaFilter(color_list)
+            & (
+                OriginalDualLandFilter()
+                | ShockLandFilter()
+                | BattleLandFilter()
+                | CheckLandFilter()
+                | RevealLandFilter()
+            )
+        ) | (
+            BasicLandReferencedFilter(
+                color_list,
+                exclusive=False,
+                minimum_count=1,
+            )
+            & FetchLandFilter()
         )
-    ) | (
-        BasicLandReferencedFilter(
-            color_list,
-            exclusive=False,
-            minimum_count=1,
-        )
-        & FetchLandFilter()
-    )
 
     cache = CacheManager()
 
@@ -68,7 +74,7 @@ def generate(
     # cache is invalidated.
     cards = set()
     for model in models:
-        if not filters.filter_value(model):
+        if not filter_tree.filter_value(model):
             continue
         cards.add(model)
 
