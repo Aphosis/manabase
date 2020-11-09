@@ -21,7 +21,7 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
-from manabase.constructor import equals, represent
+from ..constructor import equals, represent
 
 
 class Filter(metaclass=ABCMeta):

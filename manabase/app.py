@@ -3,8 +3,6 @@ from typing import Optional
 
 import typer
 
-from manabase.parser import parse_filter_string
-
 from .cache import CacheManager
 from .client import Client
 from .colors import Color
@@ -15,6 +13,7 @@ from .filters.lands.fetch import FetchLandFilter
 from .filters.lands.original import OriginalDualLandFilter
 from .filters.lands.reveal import RevealLandFilter
 from .filters.lands.shock import ShockLandFilter
+from .parser import parse_filter_string
 
 manabase = typer.Typer()
 

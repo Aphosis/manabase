@@ -1,5 +1,5 @@
 """Filters filter lands."""
-from manabase.filters.lands.base import LandFilter
+from .base import LandFilter
 
 
 class FilterLandFilter(LandFilter):
