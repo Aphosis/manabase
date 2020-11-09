@@ -77,6 +77,7 @@ def generate(
             continue
         cards.add(model)
 
+    # TODO: #12 Support more formatting options.
     print("\n".join([card.name for card in sorted(cards)]))
 
 
