@@ -25,6 +25,10 @@ def generate(
     clear_cache: Optional[bool] = False,
 ):
     """Generate a manabase."""
+    # TODO: #7 Take ``count`` and ``maximum`` into account.
+    # TODO: #8 Find a more meaningful name for ``maximum``, i.e --land-occurrences.
+    # TODO: #9 Rename ``count`` to ``lands`` as we aim to support mana rocks.
+    # TODO: #10 Manage priorities when reaching the lands limit.
     color_list = Color.from_string(colors)
 
     filters = (

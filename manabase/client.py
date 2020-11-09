@@ -36,6 +36,8 @@ class Client:
         models, has_next_page = self._fetch_cards(query, page)
         while has_next_page:
             page += 1
+            # TODO: #6 Ensure we only call the API once every .1s at most.
+            # This is to comply to Scryfall rate limiting.
             _models, has_next_page = self._fetch_cards(query, page)
             models.extend(_models)
 
