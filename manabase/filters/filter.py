@@ -21,6 +21,8 @@ from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 from typing import Any
 
+from manabase.constructor import equals, represent
+
 
 class Filter(metaclass=ABCMeta):
     """Filter than can be chained using bitwise operators.
@@ -74,6 +76,12 @@ class Filter(metaclass=ABCMeta):
 
         ```
         """
+
+    def __repr__(self) -> str:
+        return represent(self)
+
+    def __eq__(self, other: Filter) -> bool:
+        return equals(self, other)
 
 
 class CompositeFilter(Filter, metaclass=ABCMeta):

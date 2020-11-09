@@ -18,6 +18,7 @@ pydantic = "^1.7.2"
 typer = "^0.3.2"
 appdirs = "^1.4.4"
 diskcache = "^5.0.3"
+parsimonious = "^0.8.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
