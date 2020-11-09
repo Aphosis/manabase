@@ -1,6 +1,6 @@
 """Test `CompositeFilter`."""
 # pylint: disable=no-self-use, missing-function-docstring
-from manabase.filters.filter import CompositeFilter
+from manabase.filters.composite import CompositeFilter
 
 
 class LessThan(CompositeFilter):

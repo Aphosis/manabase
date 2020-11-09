@@ -5,7 +5,7 @@ It matches the card oracle text with a regex pattern.
 import re
 
 from ...cards import Card
-from ..filter import CompositeFilter
+from ..composite import CompositeFilter
 
 
 class LandFilter(CompositeFilter):

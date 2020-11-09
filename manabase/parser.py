@@ -65,7 +65,7 @@ from parsimonious.nodes import Node, NodeVisitor
 
 from .colors import Color
 from .filters.colors import BasicLandReferencedFilter, ProducedManaFilter
-from .filters.filter import CompositeFilter
+from .filters.composite import CompositeFilter
 from .filters.lands.battle import BattleLandFilter
 from .filters.lands.bond import BondLandFilter
 from .filters.lands.bounce import BounceLandFilter

@@ -4,7 +4,7 @@ from typing import List
 
 from ..cards import Card
 from ..colors import Color
-from .filter import CompositeFilter
+from .composite import CompositeFilter
 
 
 class ProducedManaFilter(CompositeFilter):
