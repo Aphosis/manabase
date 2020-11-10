@@ -7,23 +7,21 @@ from .cache import CacheManager
 from .client import Client
 from .colors import Color
 from .filter.manager import FilterManager
+from .priorities import PriorityManager
 
 manabase = typer.Typer()
 
 
 @manabase.command()
-def generate(
+def generate(  # pylint: disable=too-many-arguments
     colors: str,
     filters: Optional[str] = None,
-    _count: int = 23,
-    _maximum: int = 4,
+    lands: int = 23,
+    occurrences: int = 4,
+    priorities: Optional[str] = None,
     clear_cache: Optional[bool] = False,
 ):
     """Generate a manabase."""
-    # TODO: #7 Take ``count`` and ``maximum`` into account.
-    # TODO: #8 Find a more meaningful name for ``maximum``, i.e --land-occurrences.
-    # TODO: #9 Rename ``count`` to ``lands`` as we aim to support mana rocks.
-    # TODO: #10 Manage priorities when reaching the lands limit.
     color_list = Color.from_string(colors)
 
     if filters is not None:
@@ -32,6 +30,18 @@ def generate(
         filter_manager = FilterManager.default(color_list)
 
     cache = CacheManager()
+
+    if priorities is not None:
+        priority_manager = PriorityManager.from_string(
+            priorities,
+            lands,
+            occurrences,
+        )
+    else:
+        priority_manager = PriorityManager.default(
+            lands,
+            occurrences,
+        )
 
     if clear_cache or not cache.has_cache():
 
@@ -49,8 +59,12 @@ def generate(
     # cache is invalidated.
     filtered_cards = filter_manager.filter_cards(cards)
 
+    filtered_cards.sort()
+
+    truncated_cards = priority_manager.truncate_cards(filtered_cards)
+
     # TODO: #12 Support more formatting options.
-    print("\n".join([card.name for card in sorted(filtered_cards)]))
+    print("\n".join([card.name for card in truncated_cards]))
 
 
 if __name__ == "__main__":
