@@ -102,7 +102,4 @@ class InvertOperator(CompositeFilter):
         self.leaf = leaf
 
     def filter_value(self, value: Any) -> bool:
-        leaf = self.leaf.filter_value(value)
-        if leaf:
-            return False
-        return leaf
+        return not self.leaf.filter_value(value)
