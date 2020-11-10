@@ -1,5 +1,6 @@
 """Test filter parsing."""
 from manabase.colors import Color
+from manabase.filter.parser import parse_filter_string
 from manabase.filters.colors import (
     BasicLandReferencedFilter,
     ProducedManaFilter,
@@ -10,7 +11,6 @@ from manabase.filters.lands.fetch import FetchLandFilter
 from manabase.filters.lands.original import OriginalDualLandFilter
 from manabase.filters.lands.reveal import RevealLandFilter
 from manabase.filters.lands.shock import ShockLandFilter
-from manabase.parser import parse_filter_string
 
 
 def test_filter_parsing_simple():
