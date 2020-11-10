@@ -71,7 +71,7 @@ class OrOperator(CompositeFilter):
     def filter_value(self, value: Any) -> bool:
         left = self.left.filter_value(value)
         if left:
-            return True
+            return left
         right = self.right.filter_value(value)
         return right
 
@@ -102,4 +102,7 @@ class InvertOperator(CompositeFilter):
         self.leaf = leaf
 
     def filter_value(self, value: Any) -> bool:
-        return not self.leaf.filter_value(value)
+        leaf = self.leaf.filter_value(value)
+        if leaf:
+            return False
+        return leaf
