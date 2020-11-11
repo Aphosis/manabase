@@ -28,7 +28,7 @@ Example::
 from __future__ import annotations
 
 from enum import Enum
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 
 class Color(Enum):
@@ -82,7 +82,7 @@ class Color(Enum):
         """
         return "".join([c.value for c in colors])
 
-    def to_basic_land_name(self) -> Optional[str]:
+    def to_basic_land_name(self) -> str:
         """Return the basic land name for this `Color`."""
         if self == Color.white:
             return "Plains"
@@ -92,9 +92,7 @@ class Color(Enum):
             return "Swamp"
         if self == Color.red:
             return "Mountain"
-        if self == Color.green:
-            return "Forest"
-        return None
+        return "Forest"
 
     @staticmethod
     def dual_combinations(colors: List[Color]) -> List[Tuple[Color, Color]]:

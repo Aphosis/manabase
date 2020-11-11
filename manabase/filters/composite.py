@@ -5,39 +5,61 @@ Filters can be chained together using bitwise operators.
 Example::
 
 ```python
->>> from manabase.filters.composite import CompositeFilter
->>> class MoreThanTwo(CompositeFilter):
-...     def filter_value(self, value: int) -> bool:
-...         return value > 2
->>> class LessThanTen(CompositeFilter):
-...     def filter_value(self, value: int) -> bool:
-...         return value < 10
->>> filters = MoreThanTwo() & LessThanTen()
->>> list(filter(filters.filter_value, range(15)))
-[3, 4, 5, 6, 7, 8, 9]
+>>> from manabase.cards import Card
+>>> from manabase.filters.composite import CompositeFilter, FilterResult
+>>> class ColorFilter(CompositeFilter):
+...     color: str
+...     def filter_card(self, card: Card) -> FilterResult:
+...         if self.color in card.colors:
+...             return FilterResult(card=card, accepted_by=self)
+...         return FilterResult(card=card)
+>>> filters = ColorFilter(color="W") & ColorFilter(color="U")
+>>> card = Card(
+...     name="",
+...     oracle_text="",
+...     colors=[],
+...     color_identity=[],
+...     produced_mana=[],
+...     legalities={},
+...     textless=False,
+...     scryfall_uri="",
+... )
+>>> filters.filter_card(card)
+FilterResult(card=Card(...), accepted_by=None)
+>>> card.colors = ["W"]
+>>> filters.filter_card(card)
+FilterResult(card=Card(...), accepted_by=None)
+>>> card.colors = ["U"]
+>>> filters.filter_card(card)
+FilterResult(card=Card(...), accepted_by=None)
+>>> card.colors = ["W", "U"]
+>>> filters.filter_card(card)
+FilterResult(card=Card(...), accepted_by=ColorFilter(...))
+
+```
 """
 from __future__ import annotations
 
 from abc import ABCMeta
-from typing import Any
 
-from .base import Filter
+from ..cards import Card
+from .base import CardFilter, FilterResult
 
 
-class CompositeFilter(Filter, metaclass=ABCMeta):
+class CompositeFilter(CardFilter, metaclass=ABCMeta):
     """A filter that can be chained to other filters using bitwise operators."""
 
     def __and__(self, other: CompositeFilter) -> CompositeFilter:
-        return AndOperator(self, other)
+        return AndOperator(left=self, right=other)
 
     def __or__(self, other: CompositeFilter) -> CompositeFilter:
-        return OrOperator(self, other)
+        return OrOperator(left=self, right=other)
 
     def __xor__(self, other: CompositeFilter) -> CompositeFilter:
-        return XorOperator(self, other)
+        return XorOperator(left=self, right=other)
 
     def __invert__(self) -> CompositeFilter:
-        return InvertOperator(self)
+        return InvertOperator(leaf=self)
 
 
 class AndOperator(CompositeFilter):
@@ -46,16 +68,14 @@ class AndOperator(CompositeFilter):
     The two filters should return ``True`` to let the value through.
     """
 
-    def __init__(self, left: CompositeFilter, right: CompositeFilter):
-        self.left = left
-        self.right = right
+    left: CompositeFilter
+    right: CompositeFilter
 
-    def filter_value(self, value: Any) -> bool:
-        left = self.left.filter_value(value)
-        if not left:
-            return False
-        right = self.right.filter_value(value)
-        return right
+    def filter_card(self, card: Card) -> FilterResult:
+        left = self.left.filter_card(card)
+        if left.accepted_by is None:
+            return FilterResult(card=card)
+        return self.right.filter_card(card)
 
 
 class OrOperator(CompositeFilter):
@@ -64,15 +84,14 @@ class OrOperator(CompositeFilter):
     At least one of the two filters should return ``True`` to let the value through.
     """
 
-    def __init__(self, left: CompositeFilter, right: CompositeFilter):
-        self.left = left
-        self.right = right
+    left: CompositeFilter
+    right: CompositeFilter
 
-    def filter_value(self, value: Any) -> bool:
-        left = self.left.filter_value(value)
-        if left:
+    def filter_card(self, card: Card) -> FilterResult:
+        left = self.left.filter_card(card)
+        if left.accepted_by is not None:
             return left
-        right = self.right.filter_value(value)
+        right = self.right.filter_card(card)
         return right
 
 
@@ -82,14 +101,19 @@ class XorOperator(CompositeFilter):
     Exactly one of the two filters should return ``True`` to let the value through.
     """
 
-    def __init__(self, left: CompositeFilter, right: CompositeFilter):
-        self.left = left
-        self.right = right
+    left: CompositeFilter
+    right: CompositeFilter
 
-    def filter_value(self, value: Any) -> bool:
-        left = self.left.filter_value(value)
-        right = self.right.filter_value(value)
-        return left.__xor__(right)
+    def filter_card(self, card: Card) -> FilterResult:
+        left = self.left.filter_card(card)
+        right = self.right.filter_card(card)
+        if left.accepted_by is not None and right.accepted_by is not None:
+            return FilterResult(card=card)
+        if left.accepted_by is None and right.accepted_by is None:
+            return FilterResult(card=card)
+        if left.accepted_by is not None:
+            return FilterResult(card=card, accepted_by=self.left)
+        return FilterResult(card=card, accepted_by=self.right)
 
 
 class InvertOperator(CompositeFilter):
@@ -98,8 +122,10 @@ class InvertOperator(CompositeFilter):
     Reverses the value of the filter.
     """
 
-    def __init__(self, leaf: CompositeFilter):
-        self.leaf = leaf
+    leaf: CompositeFilter
 
-    def filter_value(self, value: Any) -> bool:
-        return not self.leaf.filter_value(value)
+    def filter_card(self, card: Card) -> FilterResult:
+        res = self.leaf.filter_card(card)
+        if res.accepted_by is not None:
+            return FilterResult(card=card)
+        return FilterResult(card=card, accepted_by=self.leaf)

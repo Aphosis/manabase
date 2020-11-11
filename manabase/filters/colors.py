@@ -1,13 +1,14 @@
 """Filter our cards based on their color identity."""
 import re
-from typing import List, Union
+from typing import List, Set, Union
 
 from ..cards import Card
 from ..colors import Color
-from .card import CardFilter, CardResult
+from ..filters.composite import CompositeFilter
+from .base import FilterResult
 
 
-class ProducedManaFilter(CardFilter):
+class ProducedManaFilter(CompositeFilter):
     """A filter checking for colors in the card produced mana.
 
     Args:
@@ -24,7 +25,7 @@ class ProducedManaFilter(CardFilter):
     >>> from manabase.colors import Color
     >>> from manabase.cards import Card
     >>> colors = [Color.white, Color.blue, Color.black]
-    >>> filter_ = ProducedManaFilter(colors)
+    >>> filter_ = ProducedManaFilter(colors=colors)
     >>> card = Card(
     ...     name="",
     ...     oracle_text="",
@@ -35,39 +36,38 @@ class ProducedManaFilter(CardFilter):
     ...     textless=False,
     ...     scryfall_uri="",
     ... )
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<ProducedManaFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=ProducedManaFilter(...))
     >>> card.produced_mana = ["W", "U", "G"]
-    >>> filter_.filter_value(card)
-    False
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=None)
     >>> filter_.exclusive = False
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<ProducedManaFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=ProducedManaFilter(...))
     >>> card.produced_mana = ["W"]
-    >>> filter_.filter_value(card)
-    False
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=None)
     >>> filter_.minimum_count = 1
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<ProducedManaFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=ProducedManaFilter(...))
 
     ```
     """
 
-    def __init__(self, colors: List[Color], exclusive=True, minimum_count=2):
-        self.colors = set(colors)
-        self.exclusive = exclusive
-        self.minimum_count = minimum_count
+    colors: Set[Color]
+    exclusive: bool = True
+    minimum_count: int = 2
 
-    def filter_value(self, card: Card) -> Union[CardResult, bool]:
+    def filter_card(self, card: Card) -> Union[FilterResult, bool]:
         produced_mana = [Color(mana) for mana in card.produced_mana if mana != "C"]
         if self.exclusive and not set(produced_mana).issubset(self.colors):
-            return False
+            return FilterResult(card=card)
         if len(self.colors.intersection(produced_mana)) < self.minimum_count:
-            return False
-        return CardResult(card, self)
+            return FilterResult(card=card)
+        return FilterResult(card=card, accepted_by=self)
 
 
-class BasicLandReferencedFilter(CardFilter):
+class BasicLandReferencedFilter(CompositeFilter):
     """A filter checking if the card text referenced some basic land names.
 
     Args:
@@ -84,7 +84,7 @@ class BasicLandReferencedFilter(CardFilter):
     >>> from manabase.colors import Color
     >>> from manabase.cards import Card
     >>> colors = [Color.white, Color.blue, Color.black]
-    >>> filter_ = BasicLandReferencedFilter(colors)
+    >>> filter_ = BasicLandReferencedFilter(colors=colors)
     >>> card = Card(
     ...     name="",
     ...     oracle_text="a Plains or Island",
@@ -95,47 +95,51 @@ class BasicLandReferencedFilter(CardFilter):
     ...     textless=False,
     ...     scryfall_uri="",
     ... )
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<BasicLandReferencedFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=BasicLandReferencedFilter(...))
     >>> card.oracle_text = "a Plains, Island or Forest"
-    >>> filter_.filter_value(card)
-    False
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=None)
     >>> filter_.exclusive = False
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<BasicLandReferencedFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=BasicLandReferencedFilter(...))
     >>> card.oracle_text = "a Plains"
-    >>> filter_.filter_value(card)
-    False
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=None)
     >>> filter_.minimum_count = 1
-    >>> filter_.filter_value(card)
-    <CardResult(card=<Card(name="")>, source=<BasicLandReferencedFilter(...)>)>
+    >>> filter_.filter_card(card)
+    FilterResult(card=Card(...), accepted_by=BasicLandReferencedFilter(...))
 
     ```
     """
 
-    def __init__(self, colors: List[Color], exclusive=True, minimum_count=2):
-        self.colors = set(colors)
-        self.exclusive = exclusive
-        self.minimum_count = minimum_count
-        self.names = set(color.to_basic_land_name() for color in colors)
-        self._regex = re.compile("(Plains|Island|Swamp|Mountain|Forest)")
+    colors: Set[Color]
+    exclusive: bool = True
+    minimum_count: int = 2
+    names: Set[str]
 
-    def filter_value(self, card: Card) -> Union[CardResult, bool]:
+    def __init__(self, **kwargs):
+        if "names" not in kwargs:
+            colors = kwargs.get("colors") or []
+            kwargs["names"] = set(color.to_basic_land_name() for color in colors)
+        super().__init__(**kwargs)
+
+    def filter_card(self, card: Card) -> Union[FilterResult, bool]:
         names = set(self._extract_basic_land_names(card))
         if self.exclusive and not names.issubset(self.names):
-            return False
+            return FilterResult(card=card)
         if len(self.names.intersection(names)) < self.minimum_count:
-            return False
-        return CardResult(card, self)
+            return FilterResult(card=card)
+        return FilterResult(card=card, accepted_by=self)
 
-    def _extract_basic_land_names(self, card: Card) -> List[str]:
+    @staticmethod
+    def _extract_basic_land_names(card: Card) -> List[str]:
         """Extract basic land names from a card text.
 
         Example::
 
         ```python
         >>> from manabase.filters.colors import BasicLandReferencedFilter
-        >>> filter_ = BasicLandReferencedFilter([])
         >>> card = Card(
         ...     name="",
         ...     oracle_text="a Plains or Island",
@@ -146,13 +150,14 @@ class BasicLandReferencedFilter(CardFilter):
         ...     textless=False,
         ...     scryfall_uri="",
         ... )
-        >>> filter_._extract_basic_land_names(card)
+        >>> BasicLandReferencedFilter._extract_basic_land_names(card)
         ['Plains', 'Island']
         >>> card.oracle_text = "a Plains, Island, Swamp, Mountain of Forest"
-        >>> filter_._extract_basic_land_names(card)
+        >>> BasicLandReferencedFilter._extract_basic_land_names(card)
         ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']
 
         ```
         """
-        names = filter(None, self._regex.findall(card.oracle_text))
+        regex = re.compile("(Plains|Island|Swamp|Mountain|Forest)")
+        names = filter(None, regex.findall(card.oracle_text))
         return list(names)

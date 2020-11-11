@@ -12,4 +12,4 @@ class BounceLandFilter(LandFilter):
             r"you control to its owner's hand\.\n"
             r"%(tap)s: Add %(symbols)s%(symbols)s\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

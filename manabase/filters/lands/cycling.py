@@ -11,4 +11,4 @@ class CyclingLandFilter(LandFilter):
             r"%(name)s enters the battlefield tapped\.\n"
             r"Cycling \{2\} \(\{2\}, Discard this card: Draw a card\.\)$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

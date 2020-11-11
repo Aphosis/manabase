@@ -11,4 +11,4 @@ class CheckLandFilter(LandFilter):
             r"(a|an) %(basics)s or (a|an) %(basics)s\.\n"
             r"%(tap)s: Add %(symbols)s or %(symbols)s\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

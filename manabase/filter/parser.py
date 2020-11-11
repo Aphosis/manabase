@@ -10,7 +10,7 @@ Example::
 >>> from manabase.filter.parser import parse_filter_string
 >>> filter_string = "original"
 >>> parse_filter_string(filter_string, [])
-<OriginalDualLandFilter()>
+OriginalDualLandFilter(...)
 
 ```
 
@@ -21,8 +21,7 @@ Example::
 >>> from manabase.filter.parser import parse_filter_string
 >>> filter_string = "producer & original"
 >>> parse_filter_string(filter_string, [])
-<AndOperator(left=<ProducedManaFilter(colors=set(), exclusive=True, minimum_count=2)>\
-, right=<OriginalDualLandFilter()>)>
+AndOperator(left=ProducedManaFilter(...), right=OriginalDualLandFilter(...))
 
 ```
 
@@ -39,8 +38,8 @@ Example::
 >>> from manabase.filter.parser import parse_filter_string
 >>> filter_string = "reference { 0, 1 } & fetch"
 >>> parse_filter_string(filter_string, [])
-<AndOperator(left=<BasicLandReferencedFilter(colors=set(), exclusive=False, \
-minimum_count=1)>, right=<FetchLandFilter()>)>
+AndOperator(left=BasicLandReferencedFilter(..., exclusive=False, \
+minimum_count=1, ...), right=FetchLandFilter(...))
 
 The grammar used to parse the filter string does not support chaining multiple
 operators, so if you use the invert unary operator (``~``), you must group it
@@ -51,8 +50,8 @@ Example::
 >>> from manabase.filter.parser import parse_filter_string
 >>> filter_string = "producer & (~original)"
 >>> parse_filter_string(filter_string, [])
-<AndOperator(left=<ProducedManaFilter(colors=set(), exclusive=True, \
-minimum_count=2)>, right=<InvertOperator(leaf=<OriginalDualLandFilter()>)>)>
+AndOperator(left=ProducedManaFilter(colors=set(), exclusive=True, \
+minimum_count=2), right=InvertOperator(leaf=OriginalDualLandFilter(...)))
 """
 # pylint: disable=no-self-use
 import inspect
@@ -134,11 +133,11 @@ class FilterStringVisitor(NodeVisitor):
 
         constructor = inspect.signature(filter_class)
 
-        args = []
+        kwargs = {}
         for parameter in constructor.parameters.values():
 
             if parameter.name == COLOR_DEPENDANT_PARAMETER_NAME:
-                args.append(self.colors)
+                kwargs[COLOR_DEPENDANT_PARAMETER_NAME] = self.colors
                 continue
 
             if not values:
@@ -150,9 +149,9 @@ class FilterStringVisitor(NodeVisitor):
                 value_class = parameter.default.__class__
                 value = value_class(value)
 
-            args.append(value)
+            kwargs[parameter.name] = value
 
-        parameters = constructor.bind_partial(*args)
+        parameters = constructor.bind_partial(**kwargs)
 
         return filter_class(*parameters.args, **parameters.kwargs)
 

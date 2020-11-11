@@ -11,4 +11,4 @@ class PainLandFilter(LandFilter):
             r"%(tap)s: Add %(symbols)s or "
             r"%(symbols)s. %(name)s deals 1 damage to you.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

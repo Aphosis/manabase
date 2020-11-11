@@ -11,11 +11,11 @@ def test_original_dual_land_filter(make_card):
     }
     card = make_card(**data)
 
-    assert filter_.filter_value(card)
+    assert filter_.filter_card(card).accepted_by is not None
 
     data = {
         "oracle_text": "({T}: Add {W} or {U}.)\nSome text.",
     }
     card = make_card(**data)
 
-    assert not filter_.filter_value(card)
+    assert filter_.filter_card(card).accepted_by is None

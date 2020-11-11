@@ -12,4 +12,4 @@ class FetchLandFilter(LandFilter):
             r"%(basics)s or %(basics)s card, "
             r"put it onto the battlefield, then shuffle your library\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

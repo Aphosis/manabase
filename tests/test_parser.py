@@ -26,7 +26,7 @@ def test_filter_parsing_and():
     """Parse ANDed filters."""
     colors = [Color.white]
     string = "producer & original"
-    expected = ProducedManaFilter(colors) & OriginalDualLandFilter()
+    expected = ProducedManaFilter(colors=colors) & OriginalDualLandFilter()
 
     assert parse_filter_string(string, colors) == expected
 
@@ -36,7 +36,7 @@ def test_filter_parsing_arguments():
     colors = [Color.white]
     string = "reference{0, 1}"
     expected = BasicLandReferencedFilter(
-        colors,
+        colors=colors,
         exclusive=False,
         minimum_count=1,
     )
@@ -53,7 +53,7 @@ def test_filter_parsing_default_filters():
     )
 
     expected = (
-        ProducedManaFilter(colors)
+        ProducedManaFilter(colors=colors)
         & (
             OriginalDualLandFilter()
             | ShockLandFilter()
@@ -63,7 +63,7 @@ def test_filter_parsing_default_filters():
         )
     ) | (
         BasicLandReferencedFilter(
-            colors,
+            colors=colors,
             exclusive=False,
             minimum_count=1,
         )
@@ -95,7 +95,7 @@ def test_filter_parsing_invert_complex():
     string = "(producer & (~original)) | fetch"
 
     expected = (
-        ProducedManaFilter(colors) & ~OriginalDualLandFilter()
+        ProducedManaFilter(colors=colors) & ~OriginalDualLandFilter()
     ) | FetchLandFilter()
 
     assert parse_filter_string(string, colors) == expected

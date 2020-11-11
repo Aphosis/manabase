@@ -11,4 +11,4 @@ class ShockLandFilter(LandFilter):
             r"As %(name)s enters the battlefield, you may pay 2 life\. "
             r"If you don't, it enters the battlefield tapped\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

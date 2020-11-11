@@ -11,4 +11,4 @@ class FastLandFilter(LandFilter):
             r"two or fewer other lands\.\n"
             r"%(tap)s: Add %(symbols)s or %(symbols)s\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

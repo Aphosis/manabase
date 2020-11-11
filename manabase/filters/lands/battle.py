@@ -11,4 +11,4 @@ class BattleLandFilter(LandFilter):
             r"%(name)s enters the battlefield tapped unless you control "
             r"two or more basic lands.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

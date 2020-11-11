@@ -12,4 +12,4 @@ class RevealLandFilter(LandFilter):
             r"If you don't, %(name)s enters the battlefield tapped\.\n"
             r"%(tap)s: Add %(symbols)s or %(symbols)s\.$"
         )
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

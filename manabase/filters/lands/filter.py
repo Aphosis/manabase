@@ -9,4 +9,4 @@ class FilterLandFilter(LandFilter):
 
     def __init__(self):
         pattern = r"^\{1\}, %(tap)s: Add %(symbols)s%(symbols)s\.$"
-        super().__init__(pattern)
+        super().__init__(pattern=pattern)

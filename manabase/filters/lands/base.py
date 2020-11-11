@@ -3,24 +3,24 @@
 It matches the card oracle text with a regex pattern.
 """
 import re
-from typing import Union
 
 from ...cards import Card
-from ..card import CardFilter, CardResult
+from ..base import FilterResult
+from ..composite import CompositeFilter
 
 
-class LandFilter(CardFilter):
+class LandFilter(CompositeFilter):
     """Filters lands based on the oracle text."""
 
-    def __init__(self, pattern: str):
-        self._regex = re.compile(self._process_pattern(pattern))
+    pattern: str
 
-    def filter_value(self, card: Card) -> Union[CardResult, bool]:
+    def filter_card(self, card: Card) -> FilterResult:
         # TODO: #4 Filter lands by extension first ?
-        res = bool(self._regex.match(card.oracle_text))
+        regex = re.compile(self._process_pattern(self.pattern))
+        res = bool(regex.match(card.oracle_text))
         if not res:
-            return False
-        return CardResult(card, self)
+            return FilterResult(card=card)
+        return FilterResult(card=card, accepted_by=self)
 
     @staticmethod
     def _process_pattern(pattern: str) -> str:
