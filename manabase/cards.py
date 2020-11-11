@@ -99,13 +99,13 @@ class CardList(BaseModel):
 
         existing.occurrences += occurrences
 
-        # PyLance seems to dislike `self.available -= occurrences`
-        self.available = self.available - occurrences
-
-        if self.available < 0:
+        if (self.available - occurrences) < 0:
             raise MaximumSizeExceeded(
                 f"This card list is limited to {self.maximum} cards."
             )
+
+        # PyLance seems to dislike `self.available -= occurrences`
+        self.available = self.available - occurrences
 
     def by_name(self, name: str) -> Optional[CardEntry]:
         """Return a entry by name."""
