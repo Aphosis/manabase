@@ -1,10 +1,10 @@
 """Filters filter lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 # TODO: Add Shadowmoor/Eventide filter lands.
 
 
-class FilterLandFilter(LandFilter):
+class FilterLandFilter(CardTextFilter):
     """Filters filter lands."""
 
     def __init__(self):

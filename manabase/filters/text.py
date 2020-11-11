@@ -1,15 +1,15 @@
-"""Base filter for lands.
+"""Filter based on the card text.
 
 It matches the card oracle text with a regex pattern.
 """
 import re
 
-from ...cards import Card
-from ..base import FilterResult
-from ..composite import CompositeFilter
+from ..cards import Card
+from .base import FilterResult
+from .composite import CompositeFilter
 
 
-class LandFilter(CompositeFilter):
+class CardTextFilter(CompositeFilter):
     """Filters lands based on the oracle text."""
 
     pattern: str

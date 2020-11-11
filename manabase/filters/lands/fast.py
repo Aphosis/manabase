@@ -1,8 +1,8 @@
 """Filter fast lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class FastLandFilter(LandFilter):
+class FastLandFilter(CardTextFilter):
     """Filters fast lands."""
 
     def __init__(self):

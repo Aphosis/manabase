@@ -1,8 +1,8 @@
 """Filter reveal lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class RevealLandFilter(LandFilter):
+class RevealLandFilter(CardTextFilter):
     """Filters reveal lands."""
 
     def __init__(self):

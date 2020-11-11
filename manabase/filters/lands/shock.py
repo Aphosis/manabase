@@ -1,8 +1,8 @@
 """Filter shock lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class ShockLandFilter(LandFilter):
+class ShockLandFilter(CardTextFilter):
     """Filters shock lands."""
 
     def __init__(self):

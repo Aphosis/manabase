@@ -1,8 +1,8 @@
 """Filter check lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class CheckLandFilter(LandFilter):
+class CheckLandFilter(CardTextFilter):
     """Filters check lands."""
 
     def __init__(self):

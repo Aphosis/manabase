@@ -1,8 +1,8 @@
 """Filter battle lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class BattleLandFilter(LandFilter):
+class BattleLandFilter(CardTextFilter):
     """Filters battle lands."""
 
     def __init__(self):

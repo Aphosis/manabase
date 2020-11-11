@@ -1,8 +1,8 @@
 """Filter fetch lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class FetchLandFilter(LandFilter):
+class FetchLandFilter(CardTextFilter):
     """Filters fetch lands."""
 
     def __init__(self):

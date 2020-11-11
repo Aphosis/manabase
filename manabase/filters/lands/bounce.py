@@ -1,8 +1,8 @@
 """Filter bounce lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class BounceLandFilter(LandFilter):
+class BounceLandFilter(CardTextFilter):
     """Filters bounce lands."""
 
     def __init__(self):

@@ -1,8 +1,8 @@
 """Filter original dual lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class OriginalDualLandFilter(LandFilter):
+class OriginalDualLandFilter(CardTextFilter):
     """Filters original dual lands."""
 
     def __init__(self):

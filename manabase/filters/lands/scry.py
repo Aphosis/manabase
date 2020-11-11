@@ -1,8 +1,8 @@
 """Filter scry lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class ScryLandFilter(LandFilter):
+class ScryLandFilter(CardTextFilter):
     """Filters scry lands."""
 
     def __init__(self):

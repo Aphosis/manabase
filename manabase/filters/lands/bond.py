@@ -1,8 +1,8 @@
 """Filter bond lands."""
-from .base import LandFilter
+from ..text import CardTextFilter
 
 
-class BondLandFilter(LandFilter):
+class BondLandFilter(CardTextFilter):
     """Filters bond lands."""
 
     def __init__(self):
