@@ -20,6 +20,13 @@ class CardEntry(Card):
     occurrences: int
 
 
+class PriorityList(BaseModel):
+    """List of cards, including metadata such as remaining slots."""
+
+    entries: List[CardEntry]
+    remaining_slots: int
+
+
 class PriorityManager(BaseModel):
     """Build prioritized lists of cards."""
 
@@ -62,9 +69,9 @@ class PriorityManager(BaseModel):
         priorities_list = [FilterAlias(alias) for alias in priorities.split()]
         return cls(lands=lands, occurrences=occurrences, priorities=priorities_list)
 
-    def truncate_results(self, results: List[FilterResult]) -> List[CardEntry]:
+    def build_list(self, results: List[FilterResult]) -> PriorityList:
         """Build a new list of cards by truncating the specified one."""
-        card_entries = []
+        entries = []
 
         if self.priorities:
             results.sort(key=self._result_key, reverse=True)
@@ -78,13 +85,13 @@ class PriorityManager(BaseModel):
                 occurrences = remaining_slots
 
             entry = CardEntry(occurrences=occurrences, **result.card.dict())
-            card_entries.append(entry)
+            entries.append(entry)
 
             remaining_slots -= occurrences
             if remaining_slots == 0:
                 break
 
-        return card_entries
+        return PriorityList(entries=entries, remaining_slots=remaining_slots)
 
     def _result_key(self, result: FilterResult) -> int:
         """Return a priority key for ``result``.

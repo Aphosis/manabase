@@ -59,10 +59,14 @@ def generate(  # pylint: disable=too-many-arguments
     # cache is invalidated.
     filter_results = filter_manager.filter_cards(cards)
 
-    truncated_cards = priority_manager.truncate_results(filter_results)
+    truncated_cards = priority_manager.build_list(filter_results)
 
     # TODO: #12 Support more formatting options.
-    print("\n".join([f"{card.occurrences} {card.name}" for card in truncated_cards]))
+    print(
+        "\n".join(
+            [f"{card.occurrences} {card.name}" for card in truncated_cards.entries]
+        )
+    )
 
 
 if __name__ == "__main__":
