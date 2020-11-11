@@ -3,6 +3,8 @@ from typing import Optional
 
 import typer
 
+from manabase.filler.filler import BasicLandFiller
+
 from .cache import CacheManager
 from .client import Client
 from .colors import Color
@@ -13,7 +15,7 @@ manabase = typer.Typer()
 
 
 @manabase.command()
-def generate(  # pylint: disable=too-many-arguments
+def generate(  # pylint: disable=too-many-arguments, too-many-locals
     colors: str,
     filters: Optional[str] = None,
     lands: int = 23,
@@ -59,14 +61,15 @@ def generate(  # pylint: disable=too-many-arguments
     # cache is invalidated.
     filter_results = filter_manager.filter_cards(cards)
 
-    truncated_cards = priority_manager.build_list(filter_results)
+    card_list = priority_manager.build_list(filter_results)
+
+    if card_list.available:
+        land_filler = BasicLandFiller(colors=color_list)
+        filler_list = land_filler.generate_filler(card_list.available)
+        card_list.update(filler_list)
 
     # TODO: #12 Support more formatting options.
-    print(
-        "\n".join(
-            [f"{card.occurrences} {card.name}" for card in truncated_cards.entries]
-        )
-    )
+    print("\n".join([f"{card.occurrences} {card.name}" for card in card_list.entries]))
 
 
 if __name__ == "__main__":

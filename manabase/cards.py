@@ -28,6 +28,20 @@ class Card(BaseModel):
     textless: bool
     scryfall_uri: str
 
+    @classmethod
+    def named(cls, name: str) -> Card:
+        """Return a card with only name data."""
+        return cls(
+            name=name,
+            oracle_text="",
+            colors=[],
+            color_identity=[],
+            produced_mana=[],
+            legalities={},
+            textless=False,
+            scryfall_uri="",
+        )
+
     def __hash__(self) -> int:
         return hash(self.json())
 
@@ -96,3 +110,15 @@ class CardList(BaseModel):
     def by_name(self, name: str) -> Optional[CardEntry]:
         """Return a entry by name."""
         return self.entries_by_name.get(name)
+
+    def update(self, other: CardList):
+        """Update this list with another one contents.
+
+        Raises:
+            MaximumSizeExceeded: When you exceed the `CardList.maximum` size
+                fixed.
+        """
+        for entry in other.entries:
+            card = Card(**entry.dict())
+            occurrences = entry.occurrences
+            self.add_card(card, occurrences)
