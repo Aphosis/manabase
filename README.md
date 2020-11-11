@@ -138,6 +138,39 @@ manabase WUB --filters="(producer & original) | (reference & fetch)"
 This package uses [`poetry`](https://python-poetry.org/) to manage its
 dependencies.
 
+### Installing
+
+[Install poetry](https://python-poetry.org/docs/#installation).
+
+Clone this repository:
+
+```bash
+git clone https://github.com/Aphosis/manabase
+cd manabase
+```
+
+Install manabase for development:
+
+```bash
+poetry install
+```
+
+### Tests
+
+Tests are written using [pytest](https://docs.pytest.org/en/stable/).
+
+Once `manabase` has been installed, you can run tests to check if your
+changes did not introduce regressions.
+
+To run the test suite, `cd` into the `manabase` folder, then run:
+
+```bash
+pytest
+```
+
+Pytest is configured in `pyproject.toml`, you do not need to specify any
+extra arguments.
+
 ## License
 
 This tool is licensed under MIT.
