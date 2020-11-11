@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "manabase"
-version = "0.1.0"
+version = "0.2.0"
 description = "Manabase generator for all your Magic: The Gathering needs."
 license = "MIT"
 authors = ["Aphosis <aphosis.github@gmail.com>"]
