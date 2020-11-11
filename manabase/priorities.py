@@ -14,6 +14,12 @@ from .filter.data import FilterAlias
 from .filters.base import FilterResult
 
 
+class CardEntry(Card):
+    """Card occurrences in a list."""
+
+    occurrences: int
+
+
 class PriorityManager(BaseModel):
     """Build prioritized lists of cards."""
 
@@ -56,25 +62,29 @@ class PriorityManager(BaseModel):
         priorities_list = [FilterAlias(alias) for alias in priorities.split()]
         return cls(lands=lands, occurrences=occurrences, priorities=priorities_list)
 
-    def truncate_results(self, results: List[FilterResult]) -> List[Card]:
+    def truncate_results(self, results: List[FilterResult]) -> List[CardEntry]:
         """Build a new list of cards by truncating the specified one."""
-        truncated_cards = []
+        card_entries = []
 
         if self.priorities:
             results.sort(key=self._result_key, reverse=True)
 
         remaining_slots = self.lands
 
-        for card in results:
-            for _ in range(self.occurrences):
+        for result in results:
+            if remaining_slots >= self.occurrences:
+                occurrences = self.occurrences
+            else:
+                occurrences = remaining_slots
 
-                truncated_cards.append(Card(**card.dict()))
+            entry = CardEntry(occurrences=occurrences, **result.card.dict())
+            card_entries.append(entry)
 
-                remaining_slots -= 1
-                if remaining_slots == 0:
-                    return truncated_cards
+            remaining_slots -= occurrences
+            if remaining_slots == 0:
+                break
 
-        return truncated_cards
+        return card_entries
 
     def _result_key(self, result: FilterResult) -> int:
         """Return a priority key for ``result``.

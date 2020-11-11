@@ -62,7 +62,7 @@ def generate(  # pylint: disable=too-many-arguments
     truncated_cards = priority_manager.truncate_results(filter_results)
 
     # TODO: #12 Support more formatting options.
-    print("\n".join([card.name for card in truncated_cards]))
+    print("\n".join([f"{card.occurrences} {card.name}" for card in truncated_cards]))
 
 
 if __name__ == "__main__":
