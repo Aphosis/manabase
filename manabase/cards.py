@@ -7,7 +7,7 @@ and artwork related data, price data, etc...
 from __future__ import annotations
 
 from functools import total_ordering
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel  # pylint: disable=no-name-in-module
 
@@ -39,3 +39,60 @@ class Card(BaseModel):
 
     def __lt__(self, other: Card) -> bool:
         return self.name < other.name
+
+
+class MaximumSizeExceeded(Exception):
+    """Raised when the maximum number of occurrences has been exceeded."""
+
+
+class CardEntry(Card):
+    """Card occurrences in a list."""
+
+    occurrences: int
+
+
+class CardList(BaseModel):
+    """List of cards, including metadata such as remaining slots."""
+
+    entries: List[CardEntry]
+    maximum: int
+    available: int
+
+    entries_by_name: Dict[str, CardEntry]
+
+    def __init__(self, maximum: int):
+        super().__init__(
+            entries=[],
+            maximum=maximum,
+            available=maximum,
+            entries_by_name={},
+        )
+
+    def add_card(self, card: Card, occurrences: int):
+        """Add a new card to this card list.
+
+        Raises:
+            MaximumSizeExceeded: When you exceed the `CardList.maximum` size
+                fixed.
+        """
+        existing = self.by_name(card.name)
+
+        if not existing:
+            entry = CardEntry(occurrences=0, **card.dict())
+            self.entries_by_name[entry.name] = entry
+            self.entries.append(entry)
+            existing = entry
+
+        existing.occurrences += occurrences
+
+        # PyLance seems to dislike `self.available -= occurrences`
+        self.available = self.available - occurrences
+
+        if self.available < 0:
+            raise MaximumSizeExceeded(
+                f"This card list is limited to {self.maximum} cards."
+            )
+
+    def by_name(self, name: str) -> Optional[CardEntry]:
+        """Return a entry by name."""
+        return self.entries_by_name.get(name)

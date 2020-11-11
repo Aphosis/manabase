@@ -9,22 +9,9 @@ from typing import List
 
 from pydantic import BaseModel
 
-from .cards import Card
+from .cards import CardList, MaximumSizeExceeded
 from .filter.data import FilterAlias
 from .filters.base import FilterResult
-
-
-class CardEntry(Card):
-    """Card occurrences in a list."""
-
-    occurrences: int
-
-
-class PriorityList(BaseModel):
-    """List of cards, including metadata such as remaining slots."""
-
-    entries: List[CardEntry]
-    remaining_slots: int
 
 
 class PriorityManager(BaseModel):
@@ -69,29 +56,23 @@ class PriorityManager(BaseModel):
         priorities_list = [FilterAlias(alias) for alias in priorities.split()]
         return cls(lands=lands, occurrences=occurrences, priorities=priorities_list)
 
-    def build_list(self, results: List[FilterResult]) -> PriorityList:
+    def build_list(self, results: List[FilterResult]) -> CardList:
         """Build a new list of cards by truncating the specified one."""
-        entries = []
-
         if self.priorities:
             results.sort(key=self._result_key, reverse=True)
 
-        remaining_slots = self.lands
+        card_list = CardList(self.lands)
 
         for result in results:
-            if remaining_slots >= self.occurrences:
-                occurrences = self.occurrences
-            else:
-                occurrences = remaining_slots
 
-            entry = CardEntry(occurrences=occurrences, **result.card.dict())
-            entries.append(entry)
-
-            remaining_slots -= occurrences
-            if remaining_slots == 0:
+            try:
+                card_list.add_card(result.card, self.occurrences)
+            except MaximumSizeExceeded:
+                if card_list.available:
+                    card_list.add_card(result.card, card_list.available)
                 break
 
-        return PriorityList(entries=entries, remaining_slots=remaining_slots)
+        return card_list
 
     def _result_key(self, result: FilterResult) -> int:
         """Return a priority key for ``result``.
