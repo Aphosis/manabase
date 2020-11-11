@@ -57,11 +57,9 @@ def generate(  # pylint: disable=too-many-arguments
 
     # TODO: #1 Cache filtering results. It should be invalidated if the query
     # cache is invalidated.
-    filtered_cards = filter_manager.filter_cards(cards)
+    filter_results = filter_manager.filter_cards(cards)
 
-    filtered_cards.sort()
-
-    truncated_cards = priority_manager.truncate_cards(filtered_cards)
+    truncated_cards = priority_manager.truncate_results(filter_results)
 
     # TODO: #12 Support more formatting options.
     print("\n".join([card.name for card in truncated_cards]))

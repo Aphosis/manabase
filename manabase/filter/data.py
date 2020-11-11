@@ -1,6 +1,10 @@
 """Filter related constants and data."""
+from __future__ import annotations
+
 from enum import Enum
 from typing import Dict, Type
+
+from manabase.filters.base import CardFilter
 
 from ..filters.colors import BasicLandReferencedFilter, ProducedManaFilter
 from ..filters.composite import CompositeFilter
@@ -43,6 +47,20 @@ class FilterAlias(Enum):
     scry = "scry"
     shock = "shock"
 
+    @staticmethod
+    def alias(filter_: CardFilter) -> FilterAlias:
+        """Return the alias for ``filter_``.
+
+        Raises:
+            KeyError: If the filter has no alias.
+        """
+        return _FILTER_ALIAS_BY_CLASS_NAME[filter_.__class__.__name__]
+
+    @staticmethod
+    def filter_type(alias: FilterAlias) -> Type[CardFilter]:
+        """Return a card filter type for a given alias."""
+        return _FILTER_CLASS_BY_ALIAS[alias]
+
 
 class FilterOperator(Enum):
     """Defines possible operators of a filter string."""
@@ -53,7 +71,7 @@ class FilterOperator(Enum):
     invert = "~"
 
 
-FILTER_CLASS_BY_ALIAS: Dict[FilterAlias, Type[CompositeFilter]] = {
+_FILTER_CLASS_BY_ALIAS: Dict[FilterAlias, Type[CompositeFilter]] = {
     FilterAlias.producer: ProducedManaFilter,
     FilterAlias.reference: BasicLandReferencedFilter,
     FilterAlias.battle: BattleLandFilter,
@@ -72,6 +90,6 @@ FILTER_CLASS_BY_ALIAS: Dict[FilterAlias, Type[CompositeFilter]] = {
     FilterAlias.shock: ShockLandFilter,
 }
 
-FILTER_ALIAS_BY_CLASS_NAME: Dict[str, FilterAlias] = {
-    v.__name__: k for k, v in FILTER_CLASS_BY_ALIAS.items()
+_FILTER_ALIAS_BY_CLASS_NAME: Dict[str, FilterAlias] = {
+    v.__name__: k for k, v in _FILTER_CLASS_BY_ALIAS.items()
 }

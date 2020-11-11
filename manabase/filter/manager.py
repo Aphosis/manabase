@@ -5,7 +5,7 @@ from typing import List
 
 from ..cards import Card
 from ..colors import Color
-from ..filters.base import CardFilter
+from ..filters.base import FilterResult
 from ..filters.colors import BasicLandReferencedFilter, ProducedManaFilter
 from ..filters.composite import CompositeFilter
 from ..filters.lands.battle import BattleLandFilter
@@ -15,12 +15,6 @@ from ..filters.lands.original import OriginalDualLandFilter
 from ..filters.lands.reveal import RevealLandFilter
 from ..filters.lands.shock import ShockLandFilter
 from .parser import parse_filter_string
-
-
-class FilteredCard(Card):
-    """A card tagged with the filter that let it through."""
-
-    filter: CardFilter
 
 
 class FilterManager:
@@ -61,17 +55,15 @@ class FilterManager:
         filters = parse_filter_string(filter_string, colors)
         return cls(colors, filters)
 
-    def filter_cards(self, cards: List[Card]) -> List[FilteredCard]:
+    def filter_cards(self, cards: List[Card]) -> List[FilterResult]:
         """Filter a list of cards."""
-        filtered_cards = []
+        results = []
 
         for card in cards:
 
             res = self.filters.filter_card(card)
 
             if res.accepted_by is not None:
-                filtered_cards.append(
-                    FilteredCard(filter=res.accepted_by, **card.dict())
-                )
+                results.append(res)
 
-        return filtered_cards
+        return results

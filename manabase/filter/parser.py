@@ -3,7 +3,7 @@
 Filter strings have their own very light syntax.
 
 Instead of class names, every filter has an alias defined by
-the `FILTER_CLASS_BY_ALIAS` constant.
+the `FilterAlias` enum.
 
 Example::
 ```python
@@ -63,7 +63,7 @@ from parsimonious.nodes import Node, NodeVisitor
 
 from ..colors import Color
 from ..filters.composite import CompositeFilter
-from .data import FILTER_CLASS_BY_ALIAS, FilterAlias, FilterOperator
+from .data import FilterAlias, FilterOperator
 
 GRAMMAR = Grammar(
     r"""
@@ -129,7 +129,7 @@ class FilterStringVisitor(NodeVisitor):
             # Then, ``arguments`` are [<arguments_open>, <ws>, <values>, ...]
             values = optional_arguments[1][2]
 
-        filter_class = FILTER_CLASS_BY_ALIAS[FilterAlias(alias.text)]
+        filter_class = FilterAlias.filter_type(FilterAlias(alias.text))
 
         constructor = inspect.signature(filter_class)
 

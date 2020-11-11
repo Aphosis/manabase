@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from .cards import Card
 from .filter.data import FilterAlias
-from .filter.manager import FilteredCard
+from .filters.base import FilterResult
 
 
 class PriorityManager(BaseModel):
@@ -56,16 +56,16 @@ class PriorityManager(BaseModel):
         priorities_list = [FilterAlias(alias) for alias in priorities.split()]
         return cls(lands=lands, occurrences=occurrences, priorities=priorities_list)
 
-    def truncate_cards(self, cards: List[FilteredCard]) -> List[Card]:
+    def truncate_results(self, results: List[FilterResult]) -> List[Card]:
         """Build a new list of cards by truncating the specified one."""
         truncated_cards = []
 
         if self.priorities:
-            cards.sort(key=self._card_key, reverse=True)
+            results.sort(key=self._result_key, reverse=True)
 
         remaining_slots = self.lands
 
-        for card in cards:
+        for card in results:
             for _ in range(self.occurrences):
 
                 truncated_cards.append(Card(**card.dict()))
@@ -76,8 +76,18 @@ class PriorityManager(BaseModel):
 
         return truncated_cards
 
-    def _card_key(self, card: FilteredCard) -> int:
+    def _result_key(self, result: FilterResult) -> int:
+        """Return a priority key for ``result``.
+
+        Raises:
+            KeyError: If accepting filter has no alias.
+        """
+        if not result.accepted_by:
+            return -1
+
+        alias = FilterAlias.alias(result.accepted_by)
+
         try:
-            return len(self.priorities) - self.priorities.index(card.filter)
+            return len(self.priorities) - self.priorities.index(alias)
         except ValueError:
             return -1
