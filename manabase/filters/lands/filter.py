@@ -1,6 +1,8 @@
 """Filters filter lands."""
 from .base import LandFilter
 
+# TODO: Add Shadowmoor/Eventide filter lands.
+
 
 class FilterLandFilter(LandFilter):
     """Filters filter lands."""
