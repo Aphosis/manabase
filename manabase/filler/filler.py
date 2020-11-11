@@ -10,11 +10,13 @@ from pydantic import BaseModel
 
 from ..cards import Card, CardList
 from ..colors import Color
-from .distribution import WeightedDistribution
+from .distribution import Distribution
 
 
 class ListFiller(BaseModel, metaclass=ABCMeta):
     """Fills a card list until its maximum size is reached."""
+
+    distribution: Distribution
 
     @abstractmethod
     def generate_filler(self, slots: int) -> CardList:
@@ -28,7 +30,5 @@ class BasicLandFiller(ListFiller):
 
     def generate_filler(self, slots: int) -> CardList:
         cards = [Card.named(color.to_basic_land_name()) for color in self.colors]
-        weights = [1] * len(cards)
-        distribution = WeightedDistribution(maximum=slots, cards=cards, weights=weights)
-        card_list = distribution.compute()
+        card_list = self.distribution.compute(cards)
         return card_list

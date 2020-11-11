@@ -3,6 +3,7 @@ from typing import Optional
 
 import typer
 
+from manabase.filler.distribution import WeightedDistribution
 from manabase.filler.filler import BasicLandFiller
 
 from .cache import CacheManager
@@ -22,6 +23,7 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     occurrences: int = 4,
     priorities: Optional[str] = None,
     clear_cache: Optional[bool] = False,
+    filler_weights: Optional[str] = None,
 ):
     """Generate a manabase."""
     color_list = Color.from_string(colors)
@@ -64,7 +66,12 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     card_list = priority_manager.build_list(filter_results)
 
     if card_list.available:
-        land_filler = BasicLandFiller(colors=color_list)
+        weights = filler_weights.split() if filler_weights else [1] * len(color_list)
+        distribution = WeightedDistribution(
+            maximum=card_list.available,
+            weights=weights,
+        )
+        land_filler = BasicLandFiller(colors=color_list, distribution=distribution)
         filler_list = land_filler.generate_filler(card_list.available)
         card_list.update(filler_list)
 
