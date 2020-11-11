@@ -5,6 +5,8 @@ Landing rock solid mana bases for your decks.
 Manabase is a command-line tool that helps you generate a mana base for your
 Magic: The Gathering decks.
 
+It uses [scryfall](https://scryfall.com/) as its source of truth.
+
 ## Installation
 
 Manabase is available on [PyPI](https://pypi.org/project/manabase/)
@@ -135,3 +137,13 @@ manabase WUB --filters="(producer & original) | (reference & fetch)"
 
 This package uses [`poetry`](https://python-poetry.org/) to manage its
 dependencies.
+
+## License
+
+This tool is licensed under MIT.
+
+## Non affiliation disclaimer
+
+Manabase is not affiliated, associated, authorized, endorsed by, or in any way
+officially connected with Wizards of the Coast, or any of its subsidiaries or
+its affiliates.
