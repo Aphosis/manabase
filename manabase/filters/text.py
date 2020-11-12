@@ -32,6 +32,7 @@ class CardTextFilter(CompositeFilter):
         context = {
             "name": r"[\w\s']+",
             "symbols": r"\{(W|U|B|R|G)\}",
+            "or-symbols": r"\{(W/U|W/B|B/R|B/G|U/B|U/R|R/G|R/W|G/W|G/U)\}",
             "tap": r"\{T\}",
             "basics": r"(Plains|Island|Swamp|Mountain|Forest)",
             "c": r"\{C\}",

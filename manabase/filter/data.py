@@ -22,6 +22,13 @@ from ..filters.lands.pain import PainLandFilter
 from ..filters.lands.reveal import RevealLandFilter
 from ..filters.lands.scry import ScryLandFilter
 from ..filters.lands.shock import ShockLandFilter
+from ..filters.rocks.banner import BannerFilter
+from ..filters.rocks.cluestone import CluestoneFilter
+from ..filters.rocks.crystal import CrystalFilter
+from ..filters.rocks.locket import LocketFilter
+from ..filters.rocks.obelisk import ObeliskFilter
+from ..filters.rocks.signet import SignetFilter
+from ..filters.rocks.talisman import TalismanFilter
 
 
 class FilterAlias(Enum):
@@ -46,6 +53,15 @@ class FilterAlias(Enum):
     reveal = "reveal"
     scry = "scry"
     shock = "shock"
+
+    # Rock filters
+    banner = "banner"
+    cluestone = "cluestone"
+    crystal = "crystal"
+    locket = "locket"
+    obelisk = "obelisk"
+    signet = "signet"
+    talisman = "talisman"
 
     @staticmethod
     def alias(filter_: CardFilter) -> FilterAlias:
@@ -88,6 +104,13 @@ _FILTER_CLASS_BY_ALIAS: Dict[FilterAlias, Type[CompositeFilter]] = {
     FilterAlias.reveal: RevealLandFilter,
     FilterAlias.scry: ScryLandFilter,
     FilterAlias.shock: ShockLandFilter,
+    FilterAlias.banner: BannerFilter,
+    FilterAlias.cluestone: CluestoneFilter,
+    FilterAlias.crystal: CrystalFilter,
+    FilterAlias.locket: LocketFilter,
+    FilterAlias.obelisk: ObeliskFilter,
+    FilterAlias.signet: SignetFilter,
+    FilterAlias.talisman: TalismanFilter,
 }
 
 _FILTER_ALIAS_BY_CLASS_NAME: Dict[str, FilterAlias] = {
