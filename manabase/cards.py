@@ -97,12 +97,12 @@ class CardList(BaseModel):
             self.entries.append(entry)
             existing = entry
 
-        existing.occurrences += occurrences
-
         if (self.available - occurrences) < 0:
             raise MaximumSizeExceeded(
                 f"This card list is limited to {self.maximum} cards."
             )
+
+        existing.occurrences += occurrences
 
         # PyLance seems to dislike `self.available -= occurrences`
         self.available = self.available - occurrences

@@ -5,6 +5,8 @@ import typer
 
 from manabase.filler.distribution import WeightedDistribution
 from manabase.filler.filler import BasicLandFiller
+from manabase.generator import ListGenerator
+from manabase.query import QueryBuilder
 
 from .cache import CacheManager
 from .client import Client
@@ -33,8 +35,6 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     else:
         filter_manager = FilterManager.default(color_list)
 
-    cache = CacheManager()
-
     if priorities is not None:
         priority_manager = PriorityManager.from_string(
             priorities,
@@ -47,33 +47,26 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
             occurrences,
         )
 
-    if clear_cache or not cache.has_cache():
+    cache = None if clear_cache else CacheManager()
+    client = Client(cache=cache)
 
-        client = Client()
+    land_query = QueryBuilder(type="land")
 
-        # TODO: #5 Multithread that part, it takes longer than forever.
-        cards = client.fetch()
+    land_weights = [int(w) for w in filler_weights.split()] or [1] * len(color_list)
+    land_distribution = WeightedDistribution(
+        maximum=occurrences,
+        weights=land_weights,
+    )
+    land_filler = BasicLandFiller(distribution=land_distribution, colors=color_list)
 
-        cache.write_cache(cards)
+    generator = ListGenerator(
+        filters=filter_manager,
+        priorities=priority_manager,
+        query=land_query,
+        filler=land_filler,
+    )
 
-    else:
-        cards = cache.read_cache()
-
-    # TODO: #1 Cache filtering results. It should be invalidated if the query
-    # cache is invalidated.
-    filter_results = filter_manager.filter_cards(cards)
-
-    card_list = priority_manager.build_list(filter_results)
-
-    if card_list.available:
-        weights = filler_weights.split() if filler_weights else [1] * len(color_list)
-        distribution = WeightedDistribution(
-            maximum=card_list.available,
-            weights=weights,
-        )
-        land_filler = BasicLandFiller(colors=color_list, distribution=distribution)
-        filler_list = land_filler.generate_filler(card_list.available)
-        card_list.update(filler_list)
+    card_list = generator.generate(client)
 
     # TODO: #12 Support more formatting options.
     print("\n".join([f"{card.occurrences} {card.name}" for card in card_list.entries]))

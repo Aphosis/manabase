@@ -19,7 +19,7 @@ class ListFiller(BaseModel, metaclass=ABCMeta):
     distribution: Distribution
 
     @abstractmethod
-    def generate_filler(self, slots: int) -> CardList:
+    def generate_filler(self, available: int) -> CardList:
         """Generate a filler card list to merge."""
 
 
@@ -28,7 +28,7 @@ class BasicLandFiller(ListFiller):
 
     colors: List[Color]
 
-    def generate_filler(self, slots: int) -> CardList:
+    def generate_filler(self, available: int) -> CardList:
         cards = [Card.named(color.to_basic_land_name()) for color in self.colors]
-        card_list = self.distribution.compute(cards)
+        card_list = self.distribution.compute(available, cards)
         return card_list

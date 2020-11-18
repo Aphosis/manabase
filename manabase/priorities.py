@@ -17,12 +17,12 @@ from .filters.base import FilterResult
 class PriorityManager(BaseModel):
     """Build prioritized lists of cards."""
 
-    lands: int = 23
+    maximum: int = 23
     occurrences: int = 1
     priorities: List[FilterAlias]
 
     @classmethod
-    def default(cls, lands: int = 23, occurrences: int = 4) -> PriorityManager:
+    def default(cls, maximum: int = 23, occurrences: int = 4) -> PriorityManager:
         """Build a default priority manager."""
         priorities = [
             FilterAlias.fetch,
@@ -32,13 +32,13 @@ class PriorityManager(BaseModel):
             FilterAlias.check,
             FilterAlias.reveal,
         ]
-        return cls(lands=lands, occurrences=occurrences, priorities=priorities)
+        return cls(maximum=maximum, occurrences=occurrences, priorities=priorities)
 
     @classmethod
     def from_string(
         cls,
         priorities: str,
-        lands: int = 23,
+        maximum: int = 23,
         occurrences: int = 4,
     ) -> PriorityManager:
         """Build a priority manager from a string of space separated aliases.
@@ -48,20 +48,20 @@ class PriorityManager(BaseModel):
         >>> from manabase.priorities import PriorityManager
         >>> string = "original fetch"
         >>> PriorityManager.from_string(string)
-        PriorityManager(lands=23, occurrences=4, priorities=[<FilterAlias.original: \
+        PriorityManager(maximum=23, occurrences=4, priorities=[<FilterAlias.original: \
 'original'>, <FilterAlias.fetch: 'fetch'>])
 
         ```
         """
         priorities_list = [FilterAlias(alias) for alias in priorities.split()]
-        return cls(lands=lands, occurrences=occurrences, priorities=priorities_list)
+        return cls(maximum=maximum, occurrences=occurrences, priorities=priorities_list)
 
     def build_list(self, results: List[FilterResult]) -> CardList:
         """Build a new list of cards by truncating the specified one."""
         if self.priorities:
             results.sort(key=self._result_key, reverse=True)
 
-        card_list = CardList(self.lands)
+        card_list = CardList(self.maximum)
 
         for result in results:
 

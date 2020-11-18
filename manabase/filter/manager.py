@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from typing import List
 
+from pydantic import BaseModel
+
 from ..cards import Card
 from ..colors import Color
 from ..filters.base import FilterResult
@@ -17,19 +19,18 @@ from ..filters.lands.shock import ShockLandFilter
 from .parser import parse_filter_string
 
 
-class FilterManager:
+class FilterManager(BaseModel):
     """Filter lists of cards."""
 
-    def __init__(self, colors: List[Color], filters: CompositeFilter):
-        self.colors = colors
-        self.filters = filters
+    colors: List[Color]
+    filters: CompositeFilter
 
     @classmethod
     def default(cls, colors: List[Color]) -> FilterManager:
         """Create a default filter tree."""
         return cls(
-            colors,
-            (
+            colors=colors,
+            filters=(
                 ProducedManaFilter(colors=colors)
                 & (
                     OriginalDualLandFilter()
@@ -53,7 +54,7 @@ class FilterManager:
     def from_string(cls, filter_string: str, colors: List[Color]) -> FilterManager:
         """Create a filter tree from a filter string."""
         filters = parse_filter_string(filter_string, colors)
-        return cls(colors, filters)
+        return cls(colors=colors, filters=filters)
 
     def filter_cards(self, cards: List[Card]) -> List[FilterResult]:
         """Filter a list of cards."""

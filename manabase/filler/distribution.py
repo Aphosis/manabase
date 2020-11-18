@@ -11,10 +11,8 @@ from ..cards import Card, CardList, MaximumSizeExceeded
 class Distribution(BaseModel, metaclass=ABCMeta):
     """Computes a distribution of cards."""
 
-    maximum: int
-
     @abstractmethod
-    def compute(self, cards: List[Card]) -> CardList:
+    def compute(self, available: int, cards: List[Card]) -> CardList:
         """Compute a card list filled with `Distribution.cards`.
 
         Occurrences of each card are based on `Distribution.weights`.
@@ -25,14 +23,14 @@ class Distribution(BaseModel, metaclass=ABCMeta):
         >>> from manabase.filler.distribution import Distribution
         >>> from manabase.cards import CardList
         >>> class SimpleDistribution(Distribution):
-        ...     def compute(self, cards):
-        ...         card_list = CardList(self.maximum)
+        ...     def compute(self, available, cards):
+        ...         card_list = CardList(available)
         ...         for card in cards:
         ...             card_list.add_card(card, 1)
         ...         return card_list
         >>> cards = [Card.named('card 1')]
-        >>> distribution = SimpleDistribution(maximum=1)
-        >>> distribution.compute(cards)
+        >>> distribution = SimpleDistribution()
+        >>> distribution.compute(1, cards)
         CardList(entries=[CardEntry(name='card 1'...)], ...)
 
         ```
@@ -48,8 +46,8 @@ class WeightedDistribution(Distribution):
     >>> from manabase.filler.distribution import WeightedDistribution
     >>> cards = [Card.named("Plains"), Card.named("Island"), Card.named("Swamp")]
     >>> weights = [3, 1, 3]
-    >>> distribution = WeightedDistribution(maximum=21, weights=weights)
-    >>> distribution.compute(cards)
+    >>> distribution = WeightedDistribution(weights=weights)
+    >>> distribution.compute(21, cards)
     CardList(entries=[CardEntry(name='Plains'...occurrences=9), CardEntry(name='Island'\
 ...occurrences=3), CardEntry(name='Swamp'...occurrences=9)]...)
 
@@ -58,7 +56,7 @@ class WeightedDistribution(Distribution):
 
     weights: List[int]
 
-    def compute(self, cards: List[Card]) -> CardList:
+    def compute(self, available: int, cards: List[Card]) -> CardList:
         """Compute a card list filled with `Distribution.cards`.
 
         Occurrences of each card are based on `Distribution.weights`.
@@ -70,12 +68,13 @@ class WeightedDistribution(Distribution):
             raise ValueError(
                 f"Weighted distribution should be computed on {len(cards)} cards."
             )
-        card_list = CardList(self.maximum)
+
+        card_list = CardList(available)
         total_weight = sum(self.weights)
 
         for card, weight in zip(cards, self.weights):
 
-            occurrences = ceil(weight * self.maximum / total_weight)
+            occurrences = ceil(weight * available / total_weight)
 
             try:
                 card_list.add_card(card, occurrences)

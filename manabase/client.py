@@ -1,8 +1,11 @@
 """Fetch data from [scryfall](https://scryfall.com/)."""
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import requests
 from pydantic import ValidationError
+
+from manabase.cache import CacheManager
+from manabase.query import QueryBuilder
 
 from .cards import Card
 
@@ -12,8 +15,9 @@ class Client:
 
     API_URL = "https://api.scryfall.com"
 
-    def __init__(self, api_url: str = API_URL):
+    def __init__(self, api_url: str = API_URL, cache: Optional[CacheManager] = None):
         self.api_url = api_url
+        self.cache = cache
 
     def route(self, path: str) -> str:
         """Build an URL endpoint from a relative path.
@@ -28,20 +32,26 @@ class Client:
         """
         return "/".join([self.api_url, path])
 
-    def fetch(self) -> List[Card]:
+    def fetch(self, builder: QueryBuilder) -> List[Card]:
         """Fetch a filtered list of cards."""
-        query = "t:land"
+        if self.cache and self.cache.has_cache():
+            return self.cache.read_cache()
+
+        query = builder.build()
         page = 1
 
-        models, has_next_page = self._fetch_cards(query, page)
+        cards, has_next_page = self._fetch_cards(query, page)
         while has_next_page:
             page += 1
             # TODO: #6 Ensure we only call the API once every .1s at most.
             # This is to comply to Scryfall rate limiting.
             _models, has_next_page = self._fetch_cards(query, page)
-            models.extend(_models)
+            cards.extend(_models)
 
-        return models
+        if self.cache is not None:
+            self.cache.write_cache(cards)
+
+        return cards
 
     def _fetch_cards(self, query: str, page: int) -> Tuple[List[Card], bool]:
         params = {"q": query, "page": page}
