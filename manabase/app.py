@@ -27,6 +27,26 @@ from .query import QueryBuilder
 manabase = typer.Typer()
 
 
+# TODO: better CLI UX.
+#
+# It is a bit weird that you have to specify colors (as they are not optional)
+# to clear the cache for exemple.
+#
+# Moreover, it will be imperative to split features in separate commands once
+# we implement user presets (see #14).
+#
+# Possibilities are:
+#
+#   - One subcommand for each feature:
+#
+#     - `manabase generate`
+#     - `manabase clear-cache`
+#     - `manabase presets`
+#
+#   - Default to manabase generation if neither `clear-cache` or `presets` is
+#     the subcommand.
+
+
 @manabase.command()
 def generate(  # pylint: disable=too-many-arguments, too-many-locals
     colors: str,
