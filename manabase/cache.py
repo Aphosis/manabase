@@ -5,6 +5,7 @@ from appdirs import user_cache_dir
 from diskcache import Index
 
 from .cards import Card
+from .query import QueryType
 from .version import __version__
 
 
@@ -26,19 +27,22 @@ class CacheManager:
         index = Index(self.cache_dir)
         return index
 
-    def has_cache(self) -> bool:
+    def has_cache(self, query: QueryType) -> bool:
         """Return ``True`` if ``index`` has a card cache."""
         try:
-            self.index.peekitem()
+            self.index[query]
         except KeyError:
             return False
         return True
 
-    def write_cache(self, cards: List[Card]):
+    def write_cache(self, query: QueryType, cards: List[Card]):
         """Write cards to the local cache."""
-        data = {card.name: card for card in cards}
-        self.index.update(data)
+        self.index.update({query: cards})
 
-    def read_cache(self) -> List[Card]:
+    def read_cache(self, query: QueryType) -> List[Card]:
         """Read cards from the local cache."""
-        return self.index.values()
+        return self.index.get(query, [])
+
+    def clear(self):
+        """Clear the cache."""
+        self.index.clear()

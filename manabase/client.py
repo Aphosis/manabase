@@ -4,10 +4,9 @@ from typing import List, Optional, Tuple
 import requests
 from pydantic import ValidationError
 
-from manabase.cache import CacheManager
-from manabase.query import QueryBuilder
-
+from .cache import CacheManager
 from .cards import Card
+from .query import QueryBuilder
 
 
 class Client:
@@ -34,8 +33,8 @@ class Client:
 
     def fetch(self, builder: QueryBuilder) -> List[Card]:
         """Fetch a filtered list of cards."""
-        if self.cache and self.cache.has_cache():
-            return self.cache.read_cache()
+        if self.cache and self.cache.has_cache(builder.type):
+            return self.cache.read_cache(builder.type)
 
         query = builder.build()
         page = 1
@@ -49,7 +48,7 @@ class Client:
             cards.extend(_models)
 
         if self.cache is not None:
-            self.cache.write_cache(cards)
+            self.cache.write_cache(builder.type, cards)
 
         return cards
 

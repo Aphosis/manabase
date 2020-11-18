@@ -8,14 +8,7 @@ from pydantic import BaseModel
 from ..cards import Card
 from ..colors import Color
 from ..filters.base import FilterResult
-from ..filters.colors import BasicLandReferencedFilter, ProducedManaFilter
 from ..filters.composite import CompositeFilter
-from ..filters.lands.battle import BattleLandFilter
-from ..filters.lands.check import CheckLandFilter
-from ..filters.lands.fetch import FetchLandFilter
-from ..filters.lands.original import OriginalDualLandFilter
-from ..filters.lands.reveal import RevealLandFilter
-from ..filters.lands.shock import ShockLandFilter
 from .parser import parse_filter_string
 
 
@@ -24,31 +17,6 @@ class FilterManager(BaseModel):
 
     colors: List[Color]
     filters: CompositeFilter
-
-    @classmethod
-    def default(cls, colors: List[Color]) -> FilterManager:
-        """Create a default filter tree."""
-        return cls(
-            colors=colors,
-            filters=(
-                ProducedManaFilter(colors=colors)
-                & (
-                    OriginalDualLandFilter()
-                    | ShockLandFilter()
-                    | BattleLandFilter()
-                    | CheckLandFilter()
-                    | RevealLandFilter()
-                )
-            )
-            | (
-                BasicLandReferencedFilter(
-                    colors=colors,
-                    exclusive=False,
-                    minimum_count=1,
-                )
-                & FetchLandFilter()
-            ),
-        )
 
     @classmethod
     def from_string(cls, filter_string: str, colors: List[Color]) -> FilterManager:

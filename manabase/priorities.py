@@ -22,19 +22,6 @@ class PriorityManager(BaseModel):
     priorities: List[FilterAlias]
 
     @classmethod
-    def default(cls, maximum: int = 23, occurrences: int = 4) -> PriorityManager:
-        """Build a default priority manager."""
-        priorities = [
-            FilterAlias.fetch,
-            FilterAlias.original,
-            FilterAlias.shock,
-            FilterAlias.battle,
-            FilterAlias.check,
-            FilterAlias.reveal,
-        ]
-        return cls(maximum=maximum, occurrences=occurrences, priorities=priorities)
-
-    @classmethod
     def from_string(
         cls,
         priorities: str,

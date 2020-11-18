@@ -1,18 +1,28 @@
 """CLI."""
-from typing import Optional
+# pylint: disable=too-many-arguments
+from typing import Callable, List, Optional
 
 import typer
 
-from manabase.filler.distribution import WeightedDistribution
-from manabase.filler.filler import BasicLandFiller
-from manabase.generator import ListGenerator
-from manabase.query import QueryBuilder
-
 from .cache import CacheManager
+from .cards import CardList
 from .client import Client
 from .colors import Color
+from .defaults import (
+    default_land_filters,
+    default_land_priorities,
+    default_rock_filters,
+    default_rock_priorities,
+)
+from .filler.distribution import WeightedDistribution
+from .filler.filler import BasicLandFiller
+from .filter.data import FilterAlias
 from .filter.manager import FilterManager
+from .filters.composite import CompositeFilter
+from .formatter import Formatter, Output
+from .generator import ListGenerator
 from .priorities import PriorityManager
+from .query import QueryBuilder
 
 manabase = typer.Typer()
 
@@ -24,52 +34,158 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     lands: int = 23,
     occurrences: int = 4,
     priorities: Optional[str] = None,
-    clear_cache: Optional[bool] = False,
     filler_weights: Optional[str] = None,
+    rocks: Optional[int] = None,
+    rock_filters: Optional[str] = None,
+    rock_priorities: Optional[str] = None,
+    clear_cache: Optional[bool] = False,
 ):
     """Generate a manabase."""
+    cache = CacheManager()
+
+    if clear_cache:
+        cache.clear()
+        return
+
     color_list = Color.from_string(colors)
 
-    if filters is not None:
-        filter_manager = FilterManager.from_string(filters, color_list)
-    else:
-        filter_manager = FilterManager.default(color_list)
-
-    if priorities is not None:
-        priority_manager = PriorityManager.from_string(
-            priorities,
-            lands,
-            occurrences,
-        )
-    else:
-        priority_manager = PriorityManager.default(
-            lands,
-            occurrences,
-        )
-
-    cache = None if clear_cache else CacheManager()
     client = Client(cache=cache)
 
-    land_query = QueryBuilder(type="land")
+    # TODO: #12 Support more formatting options.
+    formatter = Formatter(output=Output.list)
 
-    land_weights = [int(w) for w in filler_weights.split()] or [1] * len(color_list)
-    land_distribution = WeightedDistribution(
-        maximum=occurrences,
-        weights=land_weights,
+    if rocks is not None and rocks > 0:
+        rock_list = generate_rocks(
+            rock_filters,
+            rock_priorities,
+            lands,
+            occurrences,
+            color_list,
+            client,
+        )
+        typer.echo("// Rocks")
+        typer.echo(formatter.format_cards(rock_list))
+
+    land_list = generate_lands(
+        filters,
+        priorities,
+        lands,
+        occurrences,
+        filler_weights,
+        color_list,
+        client,
     )
-    land_filler = BasicLandFiller(distribution=land_distribution, colors=color_list)
+
+    typer.echo("// Lands")
+    typer.echo(formatter.format_cards(land_list))
+
+
+def generate_rocks(
+    filter_string: Optional[str],
+    priority_string: Optional[str],
+    rocks: int,
+    occurrences: int,
+    colors: List[Color],
+    client: Client,
+) -> CardList:
+    """Generate the lands card list."""
+    filter_manager = _parse_filters(filter_string, colors, default_rock_filters)
+    priority_manager = _parse_priorities(
+        priority_string,
+        rocks,
+        occurrences,
+        default_rock_priorities,
+    )
+
+    query = QueryBuilder(type="artifact")
 
     generator = ListGenerator(
         filters=filter_manager,
         priorities=priority_manager,
-        query=land_query,
-        filler=land_filler,
+        query=query,
+        filler=None,
     )
 
-    card_list = generator.generate(client)
+    return generator.generate(client)
 
-    # TODO: #12 Support more formatting options.
-    print("\n".join([f"{card.occurrences} {card.name}" for card in card_list.entries]))
+
+def generate_lands(
+    filter_string: Optional[str],
+    priority_string: Optional[str],
+    lands: int,
+    occurrences: int,
+    weights: Optional[str],
+    colors: List[Color],
+    client: Client,
+) -> CardList:
+    """Generate the lands card list."""
+    filter_manager = _parse_filters(filter_string, colors, default_land_filters)
+    priority_manager = _parse_priorities(
+        priority_string,
+        lands,
+        occurrences,
+        default_land_priorities,
+    )
+
+    query = QueryBuilder(type="land")
+
+    distribution = _parse_weights(weights, occurrences, len(colors))
+
+    filler = BasicLandFiller(distribution=distribution, colors=colors)
+
+    generator = ListGenerator(
+        filters=filter_manager,
+        priorities=priority_manager,
+        query=query,
+        filler=filler,
+    )
+
+    return generator.generate(client)
+
+
+def _parse_filters(
+    filter_string: Optional[str],
+    colors: List[Color],
+    defaults: Callable[[List[Color]], CompositeFilter],
+) -> FilterManager:
+    if filter_string is not None:
+        return FilterManager.from_string(filter_string, colors)
+    return FilterManager(colors=colors, filters=defaults(colors))
+
+
+def _parse_priorities(
+    priority_string: Optional[str],
+    maximum: int,
+    occurrences: int,
+    defaults: Callable[[], List[FilterAlias]],
+) -> PriorityManager:
+    if priority_string is not None:
+        return PriorityManager.from_string(
+            priority_string,
+            maximum,
+            occurrences,
+        )
+    return PriorityManager(
+        maximum=maximum,
+        occurrences=occurrences,
+        priorities=defaults(),
+    )
+
+
+def _parse_weights(
+    weights: Optional[str],
+    maximum: int,
+    count: int,
+) -> WeightedDistribution:
+    if weights is not None:
+        weights_ = [int(weight) for weight in weights.split()]
+    else:
+        weights_ = [1] * count
+
+    return WeightedDistribution(
+        maximum=maximum,
+        weights=weights_,
+    )
 
 
 if __name__ == "__main__":

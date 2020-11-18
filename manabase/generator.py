@@ -1,11 +1,12 @@
 """Card list generator."""
+from typing import Optional
+
 from pydantic import BaseModel
 
-from manabase.client import Client
-from manabase.filter.manager import FilterManager
-
 from .cards import CardList
+from .client import Client
 from .filler.filler import ListFiller
+from .filter.manager import FilterManager
 from .priorities import PriorityManager
 from .query import QueryBuilder
 
@@ -16,19 +17,17 @@ class ListGenerator(BaseModel):
     filters: FilterManager
     priorities: PriorityManager
     query: QueryBuilder
-    filler: ListFiller
+    filler: Optional[ListFiller] = None
 
     def generate(self, client: Client) -> CardList:
         """Generate the list of cards."""
         cards = client.fetch(self.query)
 
-        # TODO: #1 Cache filtering results. It should be invalidated if the query
-        # cache is invalidated.
         results = self.filters.filter_cards(cards)
 
         card_list = self.priorities.build_list(results)
 
-        if card_list.available:
+        if card_list.available and self.filler is not None:
             filler_list = self.filler.generate_filler(card_list.available)
             card_list.update(filler_list)
 
