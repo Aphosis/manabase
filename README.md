@@ -124,13 +124,13 @@ manabase WUB
 Generate a set of 37 maximum lands, with 1 occurrence of each land:
 
 ```bash
-manabase WUB --lands=37 --occurrences
+manabase --lands=37 --occurrences WUB
 ```
 
 Generate a list of only fetch lands and original dual lands.
 
 ```bash
-manabase WUB --filters="(producer & original) | (reference & fetch)"
+manabase --filters="(producer & original) | (reference & fetch)" WUB
 ```
 
 ## Contributing

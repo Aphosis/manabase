@@ -4,9 +4,9 @@ from typing import List, Optional
 from appdirs import user_cache_dir
 from diskcache import Index
 
+from . import __app_name__, __version__
 from .cards import Card
 from .query import QueryType
-from .version import __version__
 
 
 class CacheManager:
@@ -19,8 +19,7 @@ class CacheManager:
     @staticmethod
     def _default_cache_dir() -> str:
         """Return a default cache directory"""
-
-        return user_cache_dir("manabase", version=__version__)
+        return user_cache_dir(__app_name__, version=__version__)
 
     def _create_index(self) -> Index:
         """Create a disk index."""

@@ -9,7 +9,7 @@ homepage = "https://github.com/Aphosis/manabase"
 repository = "https://github.com/Aphosis/manabase"
 
 [tool.poetry.scripts]
-manabase = 'manabase:manabase'
+manabase = 'manabase.app:manabase'
 
 [tool.poetry.dependencies]
 python = "^3.8"

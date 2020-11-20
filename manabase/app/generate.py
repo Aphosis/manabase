@@ -4,68 +4,72 @@ from typing import Callable, List, Optional
 
 import typer
 
-from .cache import CacheManager
-from .cards import CardList
-from .client import Client
-from .colors import Color
-from .defaults import (
+from ..cache import CacheManager
+from ..cards import CardList
+from ..client import Client
+from ..colors import Color
+from ..defaults import (
     default_land_filters,
     default_land_priorities,
     default_rock_filters,
     default_rock_priorities,
 )
-from .filler.distribution import WeightedDistribution
-from .filler.filler import BasicLandFiller
-from .filter.data import FilterAlias
-from .filter.manager import FilterManager
-from .filters.composite import CompositeFilter
-from .formatter import Formatter, Output
-from .generator import ListGenerator
-from .priorities import PriorityManager
-from .query import QueryBuilder
+from ..filler.distribution import WeightedDistribution
+from ..filler.filler import BasicLandFiller
+from ..filter.data import FilterAlias
+from ..filter.manager import FilterManager
+from ..filters.composite import CompositeFilter
+from ..formatter import Formatter, Output
+from ..generator import ListGenerator
+from ..priorities import PriorityManager
+from ..query import QueryBuilder
+from ..settings import UserSettings
 
-manabase = typer.Typer()
-
-
-# TODO: better CLI UX.
-#
-# It is a bit weird that you have to specify colors (as they are not optional)
-# to clear the cache for exemple.
-#
-# Moreover, it will be imperative to split features in separate commands once
-# we implement user presets (see #14).
-#
-# Possibilities are:
-#
-#   - One subcommand for each feature:
-#
-#     - `manabase generate`
-#     - `manabase clear-cache`
-#     - `manabase presets`
-#
-#   - Default to manabase generation if neither `clear-cache` or `presets` is
-#     the subcommand.
+LANDS_DEFAULT = 23
+OCCURRENCES_DEFAULT = 4
 
 
-@manabase.command()
 def generate(  # pylint: disable=too-many-arguments, too-many-locals
+    ctx: typer.Context,
     colors: str,
     filters: Optional[str] = None,
-    lands: int = 23,
-    occurrences: int = 4,
+    lands: Optional[int] = None,
+    occurrences: Optional[int] = None,
     priorities: Optional[str] = None,
     filler_weights: Optional[str] = None,
     rocks: Optional[int] = None,
     rock_filters: Optional[str] = None,
     rock_priorities: Optional[str] = None,
-    clear_cache: Optional[bool] = False,
 ):
     """Generate a manabase."""
-    cache = CacheManager()
+    settings: UserSettings = ctx.obj
 
-    if clear_cache:
-        cache.clear()
-        return
+    if settings.active and settings.active in settings.presets:
+        preset = settings.presets[settings.active]
+
+        if filters is None:
+            filters = preset.filters
+        if lands is None:
+            lands = preset.lands
+        if occurrences is None:
+            occurrences = preset.occurrences
+        if priorities is None:
+            priorities = preset.priorities
+        if filler_weights is None:
+            filler_weights = preset.filler_weights
+        if rocks is None:
+            rocks = preset.rocks
+        if rock_filters is None:
+            rock_filters = preset.rock_filters
+        if rock_priorities is None:
+            rock_priorities = preset.rock_priorities
+
+    if lands is None:
+        lands = LANDS_DEFAULT
+    if occurrences is None:
+        occurrences = OCCURRENCES_DEFAULT
+
+    cache = CacheManager()
 
     color_list = Color.from_string(colors)
 
@@ -206,7 +210,3 @@ def _parse_weights(
         maximum=maximum,
         weights=weights_,
     )
-
-
-if __name__ == "__main__":
-    manabase()
