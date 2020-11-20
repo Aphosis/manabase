@@ -4,8 +4,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Dict, Type
 
-from manabase.filters.base import CardFilter
-
+from ..filters.base import CardFilter
 from ..filters.colors import BasicLandReferencedFilter, ProducedManaFilter
 from ..filters.composite import CompositeFilter
 from ..filters.lands.battle import BattleLandFilter

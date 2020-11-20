@@ -73,6 +73,18 @@ def test_filter_parsing_default_filters():
     assert parse_filter_string(string, colors) == expected
 
 
+def test_filter_parsing_xor():
+    """Parse a filter mixing invert operands and normal ones."""
+    colors = [Color.white]
+    string = "producer ^ reference"
+
+    expected = ProducedManaFilter(colors=colors) ^ BasicLandReferencedFilter(
+        colors=colors
+    )
+
+    assert parse_filter_string(string, colors) == expected
+
+
 def test_filter_parsing_invert():
     """Parse a filter with invert operands.
 

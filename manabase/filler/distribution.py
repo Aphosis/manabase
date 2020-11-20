@@ -66,7 +66,8 @@ class WeightedDistribution(Distribution):
         """
         if len(self.weights) != len(cards):
             raise ValueError(
-                f"Weighted distribution should be computed on {len(cards)} cards."
+                "Weighted distribution should be computed "
+                f"on {len(self.weights)} cards."
             )
 
         card_list = CardList(available)
