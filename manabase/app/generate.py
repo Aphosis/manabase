@@ -29,7 +29,7 @@ LANDS_DEFAULT = 23
 OCCURRENCES_DEFAULT = 4
 
 
-def generate(  # pylint: disable=too-many-arguments, too-many-locals
+def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, line-too-long
     ctx: typer.Context,
     colors: str,
     filters: Optional[str] = None,
@@ -42,7 +42,8 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     rock_priorities: Optional[str] = None,
 ):
     """Generate a manabase."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
+    cache: CacheManager = ctx.obj.cache
 
     if settings.active and settings.active in settings.presets:
         preset = settings.presets[settings.active]
@@ -69,8 +70,6 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
     if occurrences is None:
         occurrences = OCCURRENCES_DEFAULT
 
-    cache = CacheManager()
-
     color_list = Color.from_string(colors)
 
     client = Client(cache=cache)
@@ -82,7 +81,7 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
         rock_list = generate_rocks(
             rock_filters,
             rock_priorities,
-            lands,
+            rocks,
             occurrences,
             color_list,
             client,
@@ -90,18 +89,18 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals
         typer.echo("// Rocks")
         typer.echo(formatter.format_cards(rock_list))
 
-    land_list = generate_lands(
-        filters,
-        priorities,
-        lands,
-        occurrences,
-        filler_weights,
-        color_list,
-        client,
-    )
-
-    typer.echo("// Lands")
-    typer.echo(formatter.format_cards(land_list))
+    if lands > 0:
+        land_list = generate_lands(
+            filters,
+            priorities,
+            lands,
+            occurrences,
+            filler_weights,
+            color_list,
+            client,
+        )
+        typer.echo("// Lands")
+        typer.echo(formatter.format_cards(land_list))
 
 
 def generate_rocks(

@@ -4,9 +4,9 @@ import typer
 from ..cache import CacheManager
 
 
-def clear_cache():
+def clear_cache(ctx: typer.Context):
     """Clear the cache."""
-    cache = CacheManager()
+    cache: CacheManager = ctx.obj.cache
     cache.clear()
 
-    typer.echo(typer.style("Cache cleared.", fg=typer.colors.GREEN))
+    typer.echo("Cache cleared.")

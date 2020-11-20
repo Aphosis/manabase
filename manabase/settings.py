@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import Dict, Optional
 
 import yaml
@@ -10,7 +11,7 @@ from pydantic import BaseModel, BaseSettings
 
 from . import __app_name__, __version__
 
-DEFAULT_CONFIG = "manabase.yml"
+DEFAULT_CONFIG = __app_name__ + ".yml"
 
 
 class GenerationPreset(BaseModel):
@@ -30,36 +31,40 @@ class GenerationPreset(BaseModel):
 class UserSettings(BaseSettings):
     """Application user settings."""
 
+    # TODO: Is there any way to ignore this attribute during serialization ?
+    path: Path
     presets: Dict[str, GenerationPreset] = {}
     active: Optional[str] = None
 
     class Config:  # pylint: disable=missing-class-docstring
-        env_prefix = "manabase_"
+        env_prefix = __app_name__ + "_"
 
     @classmethod
-    def from_file(cls, path: str) -> UserSettings:
+    def from_file(cls, path: Path) -> UserSettings:
         """Read settings from a YAML file."""
         with open(path) as handle:
             data = yaml.safe_load(handle)
+
+        data["path"] = path
         return cls(**data)
 
     @staticmethod
-    def default_path() -> str:
+    def default_path() -> Path:
         """Return the default configuration path."""
-        return os.path.join(
-            user_config_dir(__app_name__, version=__version__), DEFAULT_CONFIG
-        )
+        return Path(user_config_dir(__app_name__, version=__version__)) / DEFAULT_CONFIG
 
-    def save(self, path: Optional[str] = None):
+    def save(self, path: Optional[Path] = None):
         """Save settings to file.
 
         If no file path is provided, saves to `UserSettings.default_path`.
         """
-        path = path or self.default_path()
+        path = path or self.path
 
-        parent = os.path.dirname(path)
-        if not os.path.isdir(parent):
-            os.makedirs(parent)
+        if not path.parent.is_dir():
+            os.makedirs(path.parent)
+
+        data = self.dict()
+        data.pop("path")
 
         with open(path, "w") as handle:
-            yaml.safe_dump(self.dict(), handle)
+            yaml.safe_dump(data, handle)

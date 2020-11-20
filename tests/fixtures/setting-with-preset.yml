@@ -1,0 +1,12 @@
+active: default
+presets:
+  default:
+    filler_weights: 1 3 1
+    filters: producer & (shock | original)
+    lands: 37
+    name: default
+    occurrences: 1
+    priorities: original shock
+    rock_filters: producer & (obelisk | crystal)
+    rock_priorities: crystal obelisk
+    rocks: 5

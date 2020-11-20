@@ -27,10 +27,10 @@ def new(  # pylint: disable=too-many-arguments, too-many-locals
     rock_priorities: Optional[str] = None,
 ):
     """Create a new preset."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name in settings.presets:
-        typer.echo(typer.style("Preset already exists.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'Preset "{name}" already exists.', fg=typer.colors.RED))
         return
 
     preset = GenerationPreset(
@@ -49,28 +49,32 @@ def new(  # pylint: disable=too-many-arguments, too-many-locals
 
     settings.save()
 
+    typer.echo(f'Created preset "{name}".')
+
 
 @app.command()
 def use(ctx: typer.Context, name: str):
     """Set the active preset."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name not in settings.presets:
-        typer.echo(typer.style(f"No preset named {name}.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'No preset named "{name}".', fg=typer.colors.RED))
         return
 
     if settings.active == name:
-        typer.echo(f"{name} is already the active preset.")
+        typer.echo(f'"{name}" is already the active preset.')
         return
 
     settings.active = name
     settings.save()
 
+    typer.echo(f'Active preset is now "{name}".')
+
 
 @app.command()
 def active(ctx: typer.Context):
     """Print the active preset."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if not settings.active:
         typer.echo("There is no active preset.")
@@ -81,14 +85,10 @@ def active(ctx: typer.Context):
 @app.command(name="list")
 def list_(ctx: typer.Context):
     """List all user presets."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if not settings.presets:
-        msg = (
-            "No preset saved. Create one with `"
-            + typer.style("manabase presets new", fg=typer.colors.GREEN)
-            + "`."
-        )
+        msg = "No preset saved. Create one with `manabase presets new`."
     else:
         msg = "\n".join([f"- {preset}" for preset in settings.presets])
 
@@ -98,10 +98,10 @@ def list_(ctx: typer.Context):
 @app.command()
 def show(ctx: typer.Context, name: str):
     """Show a user preset options."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name not in settings.presets:
-        typer.echo(typer.style(f"No preset named {name}.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'No preset named "{name}".', fg=typer.colors.RED))
         return
 
     preset = settings.presets[name]
@@ -135,10 +135,10 @@ def update(  # pylint: disable=too-many-arguments, too-many-locals
 
     It will replace all options with the one you define.
     """
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name not in settings.presets:
-        typer.echo(typer.style(f"No preset named {name}.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'No preset named "{name}".', fg=typer.colors.RED))
         return
 
     preset = settings.presets[name]
@@ -154,6 +154,8 @@ def update(  # pylint: disable=too-many-arguments, too-many-locals
     preset.rock_priorities = rock_priorities
 
     settings.save()
+
+    typer.echo(f'Updated preset "{name}".')
 
 
 @app.command()
@@ -173,10 +175,10 @@ def patch(  # pylint: disable=too-many-arguments, too-many-locals
 
     It will add options you define to an existing preset.
     """
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name not in settings.presets:
-        typer.echo(typer.style(f"No preset named {name}.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'No preset named "{name}".', fg=typer.colors.RED))
         return
 
     preset = settings.presets[name]
@@ -202,16 +204,20 @@ def patch(  # pylint: disable=too-many-arguments, too-many-locals
 
     settings.save()
 
+    typer.echo(f'Patched preset "{name}".')
+
 
 @app.command()
 def delete(ctx: typer.Context, name: str):
     """Delete a user preset."""
-    settings: UserSettings = ctx.obj
+    settings: UserSettings = ctx.obj.settings
 
     if name not in settings.presets:
-        typer.echo(typer.style(f"No preset named {name}.", fg=typer.colors.RED))
+        typer.echo(typer.style(f'No preset named "{name}".', fg=typer.colors.RED))
         return
 
     del settings.presets[name]
 
     settings.save()
+
+    typer.echo(f'Deleted preset "{name}".')
