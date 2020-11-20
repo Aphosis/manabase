@@ -355,7 +355,7 @@ pytest = ">=4.6"
 name = "pyyaml"
 version = "5.3.1"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -476,7 +476,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.0"
 python-versions = "^3.8"
-content-hash = "de164db89ed502ffc49192b1ab4e21c205839cdac23b6a78b862a91d6228e850"
+content-hash = "045aadd00b2c2c087730a00cf2aaf409a0f5269afc17f0425672449f80099a32"
 
 [metadata.files]
 appdirs = [
