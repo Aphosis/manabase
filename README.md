@@ -133,6 +133,89 @@ Generate a list of only fetch lands and original dual lands.
 manabase --filters="(producer & original) | (reference & fetch)" WUB
 ```
 
+### Presets
+
+Specifying command-line arguments can be a bit cumbersome, especially for the
+`--filters` option.
+
+A generation preset allows you to specify any **options** the `generate` command
+takes in, and apply them automatically.
+
+For the following sections, it is assumed the preset name is `default`.
+
+#### Creating a preset
+
+To create a new preset, use the `manabase presets new` command, with a name for
+the new preset and any option the `generate` command can take.
+
+```bash
+manabase presets new default --filters="(producer & (original | shock)) | (reference & fetch)" --lands=37 --occurrences=1
+```
+
+#### Selecting the active preset
+
+The active preset is the one used automatically when using the
+`generate` command.
+
+You can activate an existing preset with the following command.
+
+```bash
+manabase presets use default
+```
+
+Note: when you create a new preset, it is automatically activated
+for you.
+
+#### Printing the active preset
+
+You can print the active preset with the following command.
+
+```bash
+manabase presets active
+```
+
+#### Listing existing presets
+
+You can list existing preset names with the following command.
+
+```bash
+manabase presets list
+```
+
+#### Printing a preset
+
+To print a preset content to the terminal, use the following command.
+
+```bash
+manabase presets show default
+```
+
+#### Updating a preset
+
+Updating a preset replaces all its options with new ones.
+
+If you meant to add a new option, or update a single option, use the `patch` subcommand.
+
+```bash
+manabase presets update default --lands=35
+```
+
+#### Patching a preset
+
+Patching a preset adds a new option or updates an existing one.
+
+```bash
+manabase presets patch default --occurrences=4
+```
+
+#### Deleting a preset
+
+Deleting a presets erases its file from disk.
+
+```bash
+manabase presets delete default
+```
+
 ## Contributing
 
 This package uses [`poetry`](https://python-poetry.org/) to manage its
