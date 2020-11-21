@@ -24,6 +24,7 @@ def make_card() -> Callable[..., Card]:
             "legalities": {},
             "textless": False,
             "scryfall_uri": "",
+            "set": "",
         }
         default.update(data)
         return Card(**default)

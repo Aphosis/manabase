@@ -25,6 +25,7 @@ def new(  # pylint: disable=too-many-arguments, too-many-locals
     rocks: Optional[int] = None,
     rock_filters: Optional[str] = None,
     rock_priorities: Optional[str] = None,
+    sets: Optional[str] = None,
 ):
     """Create a new preset."""
     settings: UserSettings = ctx.obj.settings
@@ -43,6 +44,7 @@ def new(  # pylint: disable=too-many-arguments, too-many-locals
         rocks=rocks,
         rock_filters=rock_filters,
         rock_priorities=rock_priorities,
+        sets=sets,
     )
     settings.presets[name] = preset
     settings.active = name
@@ -130,6 +132,7 @@ def update(  # pylint: disable=too-many-arguments, too-many-locals
     rocks: Optional[int] = None,
     rock_filters: Optional[str] = None,
     rock_priorities: Optional[str] = None,
+    sets: Optional[str] = None,
 ):
     """Update a user preset.
 
@@ -152,6 +155,7 @@ def update(  # pylint: disable=too-many-arguments, too-many-locals
     preset.rocks = rocks
     preset.rock_filters = rock_filters
     preset.rock_priorities = rock_priorities
+    preset.sets = sets
 
     settings.save()
 
@@ -170,6 +174,7 @@ def patch(  # pylint: disable=too-many-arguments, too-many-locals
     rocks: Optional[int] = None,
     rock_filters: Optional[str] = None,
     rock_priorities: Optional[str] = None,
+    sets: Optional[str] = None,
 ):
     """Patch a user preset.
 
@@ -199,6 +204,8 @@ def patch(  # pylint: disable=too-many-arguments, too-many-locals
         preset.rock_filters = rock_filters
     if rock_priorities is not None:
         preset.rock_priorities = rock_priorities
+    if sets is not None:
+        preset.sets = sets
 
     settings.presets[name] = preset
 

@@ -186,6 +186,7 @@ def test_patch(fresh_settings: Path):
             "--rocks=5",
             "--rock-filters=signet | talisman",
             "--rock-priorities=talisman",
+            "--sets=cm2",
         ],
     )
     assert result.exit_code == 0

@@ -20,6 +20,16 @@ from .filters.rocks.signet import SignetFilter
 from .filters.rocks.talisman import TalismanFilter
 
 
+def default_lands() -> int:
+    """Return the default number of lands to generate."""
+    return 23
+
+
+def default_occurrences() -> int:
+    """Return the default number of occurrences of cards."""
+    return 4
+
+
 def default_land_filters(colors: List[Color]) -> CompositeFilter:
     """Build and return default land filters."""
     return (
@@ -67,4 +77,33 @@ def default_rock_priorities() -> List[FilterAlias]:
         FilterAlias.talisman,
         FilterAlias.crystal,
         FilterAlias.obelisk,
+    ]
+
+
+def default_sets() -> List[str]:
+    """Return default set codes.
+
+    This is used to build the Scryfall query and to filter cards.
+    """
+    return [
+        "ala",
+        "c13",
+        "c20",
+        "cm2",
+        "cma",
+        "cmr",
+        "dom",
+        "e01",
+        "grn",
+        "iko",
+        "ktk",
+        "mh1",
+        "mm3",
+        "mrd",
+        "rna",
+        "soi",
+        "td2",
+        "vma",
+        "xln",
+        "znc",
     ]

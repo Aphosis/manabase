@@ -4,6 +4,9 @@ from typing import Callable, List, Optional
 
 import typer
 
+from manabase.filter.parser import parse_filter_string
+from manabase.filters.set import CardSetFilter
+
 from ..cache import CacheManager
 from ..cards import CardList
 from ..client import Client
@@ -11,8 +14,11 @@ from ..colors import Color
 from ..defaults import (
     default_land_filters,
     default_land_priorities,
+    default_lands,
+    default_occurrences,
     default_rock_filters,
     default_rock_priorities,
+    default_sets,
 )
 from ..filler.distribution import WeightedDistribution
 from ..filler.filler import BasicLandFiller
@@ -22,11 +28,8 @@ from ..filters.composite import CompositeFilter
 from ..formatter import Formatter, Output
 from ..generator import ListGenerator
 from ..priorities import PriorityManager
-from ..query import QueryBuilder
+from ..query import SetQueryBuilder
 from ..settings import UserSettings
-
-LANDS_DEFAULT = 23
-OCCURRENCES_DEFAULT = 4
 
 
 def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-branches, line-too-long
@@ -40,6 +43,7 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-b
     rocks: Optional[int] = None,
     rock_filters: Optional[str] = None,
     rock_priorities: Optional[str] = None,
+    sets: Optional[str] = None,
 ):
     """Generate a manabase."""
     settings: UserSettings = ctx.obj.settings
@@ -64,11 +68,18 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-b
             rock_filters = preset.rock_filters
         if rock_priorities is None:
             rock_priorities = preset.rock_priorities
+        if sets is None:
+            sets = preset.sets
+
+    if sets is not None:
+        set_codes = sets.split(" ")
+    else:
+        set_codes = default_sets()
 
     if lands is None:
-        lands = LANDS_DEFAULT
+        lands = default_lands()
     if occurrences is None:
-        occurrences = OCCURRENCES_DEFAULT
+        occurrences = default_occurrences()
 
     color_list = Color.from_string(colors)
 
@@ -83,6 +94,7 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-b
             rock_priorities,
             rocks,
             occurrences,
+            set_codes,
             color_list,
             client,
         )
@@ -96,6 +108,7 @@ def generate(  # pylint: disable=too-many-arguments, too-many-locals, too-many-b
             lands,
             occurrences,
             filler_weights,
+            set_codes,
             color_list,
             client,
         )
@@ -108,11 +121,12 @@ def generate_rocks(
     priority_string: Optional[str],
     rocks: int,
     occurrences: int,
+    sets: List[str],
     colors: List[Color],
     client: Client,
 ) -> CardList:
     """Generate the lands card list."""
-    filter_manager = _parse_filters(filter_string, colors, default_rock_filters)
+    filter_manager = _parse_filters(filter_string, sets, colors, default_rock_filters)
     priority_manager = _parse_priorities(
         priority_string,
         rocks,
@@ -120,7 +134,7 @@ def generate_rocks(
         default_rock_priorities,
     )
 
-    query = QueryBuilder(type="artifact")
+    query = SetQueryBuilder(sets=sets, type="artifact")
 
     generator = ListGenerator(
         filters=filter_manager,
@@ -138,11 +152,12 @@ def generate_lands(
     lands: int,
     occurrences: int,
     weights: Optional[str],
+    sets: List[str],
     colors: List[Color],
     client: Client,
 ) -> CardList:
     """Generate the lands card list."""
-    filter_manager = _parse_filters(filter_string, colors, default_land_filters)
+    filter_manager = _parse_filters(filter_string, sets, colors, default_land_filters)
     priority_manager = _parse_priorities(
         priority_string,
         lands,
@@ -150,7 +165,7 @@ def generate_lands(
         default_land_priorities,
     )
 
-    query = QueryBuilder(type="land")
+    query = SetQueryBuilder(sets=sets, type="land")
 
     distribution = _parse_weights(weights, occurrences, len(colors))
 
@@ -168,12 +183,17 @@ def generate_lands(
 
 def _parse_filters(
     filter_string: Optional[str],
+    sets: List[str],
     colors: List[Color],
     defaults: Callable[[List[Color]], CompositeFilter],
 ) -> FilterManager:
     if filter_string is not None:
-        return FilterManager.from_string(filter_string, colors)
-    return FilterManager(colors=colors, filters=defaults(colors))
+        filters = parse_filter_string(filter_string, colors)
+    else:
+        filters = defaults(colors)
+
+    filters = CardSetFilter(sets=sets) & filters
+    return FilterManager(colors=colors, filters=filters)
 
 
 def _parse_priorities(

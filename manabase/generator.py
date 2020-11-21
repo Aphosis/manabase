@@ -8,7 +8,7 @@ from .client import Client
 from .filler.filler import ListFiller
 from .filter.manager import FilterManager
 from .priorities import PriorityManager
-from .query import QueryBuilder
+from .query import SetQueryBuilder
 
 
 class ListGenerator(BaseModel):
@@ -16,7 +16,7 @@ class ListGenerator(BaseModel):
 
     filters: FilterManager
     priorities: PriorityManager
-    query: QueryBuilder
+    query: SetQueryBuilder
     filler: Optional[ListFiller] = None
 
     def generate(self, client: Client) -> CardList:

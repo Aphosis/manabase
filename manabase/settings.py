@@ -26,6 +26,7 @@ class GenerationPreset(BaseModel):
     rocks: Optional[int] = None
     rock_filters: Optional[str] = None
     rock_priorities: Optional[str] = None
+    sets: Optional[str] = None
 
 
 class UserSettings(BaseSettings):

@@ -35,6 +35,7 @@ class ProducedManaFilter(CompositeFilter):
     ...     legalities={},
     ...     textless=False,
     ...     scryfall_uri="",
+    ...     set="",
     ... )
     >>> filter_.filter_card(card)
     FilterResult(card=Card(...), accepted_by=ProducedManaFilter(...))
@@ -94,6 +95,7 @@ class BasicLandReferencedFilter(CompositeFilter):
     ...     legalities={},
     ...     textless=False,
     ...     scryfall_uri="",
+    ...     set="",
     ... )
     >>> filter_.filter_card(card)
     FilterResult(card=Card(...), accepted_by=BasicLandReferencedFilter(...))
@@ -149,6 +151,7 @@ class BasicLandReferencedFilter(CompositeFilter):
         ...     legalities={},
         ...     textless=False,
         ...     scryfall_uri="",
+        ...     set="",
         ... )
         >>> BasicLandReferencedFilter._extract_basic_land_names(card)
         ['Plains', 'Island']

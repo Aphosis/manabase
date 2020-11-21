@@ -15,7 +15,6 @@ class CardTextFilter(CompositeFilter):
     pattern: str
 
     def filter_card(self, card: Card) -> FilterResult:
-        # TODO: #4 Filter lands by extension first ?
         regex = re.compile(self._process_pattern(self.pattern))
         res = bool(regex.match(card.oracle_text))
         if not res:

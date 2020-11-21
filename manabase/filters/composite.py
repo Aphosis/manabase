@@ -23,6 +23,7 @@ Example::
 ...     legalities={},
 ...     textless=False,
 ...     scryfall_uri="",
+...     set="",
 ... )
 >>> filters.filter_card(card)
 FilterResult(card=Card(...), accepted_by=None)

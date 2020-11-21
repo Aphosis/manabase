@@ -45,6 +45,7 @@ class CardFilter(BaseModel, metaclass=ABCMeta):
     ...     legalities={},
     ...     textless=False,
     ...     scryfall_uri="",
+    ...     set="",
     ... )
     >>> operator.filter_card(card)
     FilterResult(card=Card(...), accepted_by=None)
@@ -82,6 +83,7 @@ class CardFilter(BaseModel, metaclass=ABCMeta):
         ...     legalities={},
         ...     textless=False,
         ...     scryfall_uri="",
+        ...     set="",
         ... )
         >>> filter_.filter_card(card)
         FilterResult(card=Card(...), accepted_by=None)

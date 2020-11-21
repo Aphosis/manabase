@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from .cache import CacheManager
 from .cards import Card
-from .query import QueryBuilder
+from .query import SetQueryBuilder
 
 
 class Client:
@@ -32,9 +32,9 @@ class Client:
         """
         return "/".join([self.api_url, path])
 
-    def fetch(self, builder: QueryBuilder) -> List[Card]:
+    def fetch(self, builder: SetQueryBuilder) -> List[Card]:
         """Fetch a filtered list of cards."""
-        if self.cache and self.cache.has_cache(builder.type):
+        if self.cache and self.cache.has_cache(builder.type, builder.sets):
             return self.cache.read_cache(builder.type)
 
         query = builder.build()
@@ -42,7 +42,7 @@ class Client:
         cards = self._fetch_cards(query)
 
         if self.cache is not None:
-            self.cache.write_cache(builder.type, cards)
+            self.cache.write_cache(builder.type, builder.sets, cards)
 
         return cards
 

@@ -27,6 +27,7 @@ class Card(BaseModel):
     legalities: Dict[str, str]
     textless: bool
     scryfall_uri: str
+    set: str
 
     @classmethod
     def named(cls, name: str) -> Card:
@@ -40,6 +41,7 @@ class Card(BaseModel):
             legalities={},
             textless=False,
             scryfall_uri="",
+            set="",
         )
 
     def __hash__(self) -> int:
