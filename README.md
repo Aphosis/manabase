@@ -5,7 +5,10 @@ Landing rock solid mana bases for your decks.
 Manabase is a command-line tool that helps you generate a mana base for your
 Magic: The Gathering decks.
 
-It uses [scryfall](https://scryfall.com/) as its source of truth.
+It uses [scryfall](https://scryfall.com/) as its source of truth to find suitable
+lands and mana rocks for your colors.
+
+Note: Manabase comes pre-configured for Commander decks, but is fully customizable.
 
 ## Installation
 
@@ -16,21 +19,48 @@ Install manabase using `pip`:
 pip install --user manabase
 ```
 
+# Quickstart
+
+To generate a new manabase with default settings, run the following command:
+
+```bash
+manabase generate WUB
+```
+
+This will output a manabase of 37 unique lands for a white, blue and black deck.
+
 ## Usage
 
-Manabase offers a primary command, `manabase`, that generates a list of lands
-for a set of colors.
+Manabase offers a primary command, `manabase`, that generates a list of lands and
+optionally rocks for a set of colors.
+
+### Colors
+
+Colors must be specified in the command, and are expressed as a string of letters.
+
+Each color has one unique letter assigned:
+
+- White: `W`
+- Blue: `U`
+- Black: `B`
+- Red: `R`
+- Green: `G`
+
+So if you wanted to generate a red and green manabase, you would use the command
+`manabase generate RG`.
 
 ### Filters
 
-Manabase includes a set of powerful filters, defining which type of lands are
+Manabase includes a set of powerful filters, defining which type of lands and rocks are
 allowed in the output list.
 
-These type of lands are called land cycles, and are defined by
-[MTG Gamepedia](https://mtg.gamepedia.com/Dual_land).
+These type of cards are called cycles, and are defined by MTG Gamepedia for both
+[lands](https://mtg.gamepedia.com/Dual_land) and [rocks](https://mtg.gamepedia.com/Mana_stone)
 
 Following is a list of supported cycles, and the name of the corresponding
-filter:
+filter.
+
+Lands:
 
 - [`battle`](https://mtg.gamepedia.com/Battle_land): Battle for Zendikar dual lands.
 - [`bond`](https://mtg.gamepedia.com/Bond_land): Battlebond and Commander Legends crowd lands.
@@ -49,11 +79,21 @@ filter:
 - [`scry`](https://mtg.gamepedia.com/Scry_land): Theros and M21 scry lands.
 - [`shock`](https://mtg.gamepedia.com/Shock_land): Ravnica shock lands.
 
+Rocks:
+
+- `banner`: Khans of Tarkir banners.
+- `cluestone`: Ravnica clue stones.
+- `crystal`: Ikoria crystals.
+- `locket`: Ravnica lockets.
+- `obelisk`: Alara obelisks.
+- `signet`: Ravnica signets.
+- `talisman`: Mirrodin talismans.
+
 Additionally, two color-related filters are provided:
 
 These are:
 
-- `producer`: This filter checks if the land produces mana of the given colors.
+- `producer`: This filter checks if the card produces mana of the given colors.
 - `reference`: This filter checks if a reference to a land type of the given
   colors is contained in the card text.
 
@@ -62,7 +102,7 @@ Without these filters, all colors could be matched.
 Examples:
 
 `fetch` will accept all fetch lands.
-`producer` will accept all lands that can produce your colors.
+`producer` will accept all cards that can produce your colors.
 
 ### Operators
 
@@ -80,7 +120,7 @@ Examples:
 
 - `reference & fetch` would match only fetch lands respecting your colors.
 - `(producer & original) | (reference & fetch)` would match either original
-  lands producing your colors, or fetch lands of your colors.
+  dual lands producing your colors, or fetch lands of your colors.
 
 ### Filter arguments
 
@@ -89,11 +129,11 @@ Finally, some filters can take arguments to control their behavior.
 `producer` and `reference` each take `exclusive` and `minimum_count` arguments.
 
 `exclusive`, which is true by default, prevents cards matching colors other than
-yours. For example, if you asked for white and blue, a white and red land would
+yours. For example, if you asked for white and blue, a white and red producer would
 be excluded, because it contains red.
 
-`minimum_count` sets the number of colors a land should match, among your colors,
-before being accepted. By default this is 2, which means lands have to produce
+`minimum_count` sets the number of colors a card should match, among your colors,
+before being accepted. By default this is 2, which means cards have to produce
 or reference at least two of your colors to be accepted.
 
 This filters can help you define a better behavior, for example for fetch lands
@@ -105,7 +145,7 @@ curly braces, separated by commas.
 
 Examples:
 
-- `producer { 0, 3 }` would match all lands producing at least three of your
+- `producer { 0, 3 }` would match all cards producing at least three of your
   colors, without excluding other colors.
 - `reference { 0, 1 } & fetch` would match fetch lands producing at least one
   of your colors, without excluding other colors.
@@ -118,20 +158,46 @@ a set of lands for a white, blue and black deck.
 Generate a set of lands using default settings:
 
 ```bash
-manabase WUB
+manabase generate WUB
 ```
 
-Generate a set of 37 maximum lands, with 1 occurrence of each land:
+Generate a set of 23 maximum lands, with 4 occurrence of each land:
 
 ```bash
-manabase --lands=37 --occurrences WUB
+manabase generate --lands=23 --occurrences=4 WUB
 ```
 
 Generate a list of only fetch lands and original dual lands.
 
 ```bash
-manabase --filters="(producer & original) | (reference & fetch)" WUB
+manabase generate --filters="(producer & original) | (reference & fetch)" WUB
 ```
+
+### Land Fillers
+
+If Manabase cannot find as many lands as you asked for, it will begin filling
+the list with basic lands.
+
+You have the option to specify weights to refine the distribution of these basic
+lands.
+
+By default, the same amount of each basic land will be added.
+
+If your mana costs are heavier in one color for example, you might want to add
+more of one basic land than the others.
+
+The following command will generate a manabase including more Plains than
+Island or Swamp cards.
+
+```bash
+manabase generate --filler-weights="4 1 1" WUB
+```
+
+The number of weights must match the number of colors, and express a ratio
+between the basic land distribution.
+
+In our case, a two thirds of all basic lands should be plains, will the last
+third will be equally Island and Swamp cards.
 
 ### Presets
 
