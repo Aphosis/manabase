@@ -41,11 +41,12 @@ def main(
 
     It uses https://scryfall.com/ as its source of truth.
     """
-    config_path: Path = (
-        config if config and config.is_file() else UserSettings.default_path()
-    )
+    config_path: Path = config if config else UserSettings.default_path()
 
-    settings = UserSettings.from_file(config_path)
+    if config_path.is_file():
+        settings = UserSettings.from_file(config_path)
+    else:
+        settings = UserSettings(path=config_path)
 
     cache_path: Path = (
         cache if cache and cache.is_file() else CacheManager.default_path()
