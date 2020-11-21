@@ -22,12 +22,12 @@ from .filters.rocks.talisman import TalismanFilter
 
 def default_lands() -> int:
     """Return the default number of lands to generate."""
-    return 23
+    return 37
 
 
 def default_occurrences() -> int:
     """Return the default number of occurrences of cards."""
-    return 4
+    return 1
 
 
 def default_land_filters(colors: List[Color]) -> CompositeFilter:

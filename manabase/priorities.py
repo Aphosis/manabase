@@ -10,6 +10,7 @@ from typing import List
 from pydantic import BaseModel
 
 from .cards import CardList, MaximumSizeExceeded
+from .defaults import default_lands, default_occurrences
 from .filter.data import FilterAlias
 from .filters.base import FilterResult
 
@@ -17,16 +18,16 @@ from .filters.base import FilterResult
 class PriorityManager(BaseModel):
     """Build prioritized lists of cards."""
 
-    maximum: int = 23
-    occurrences: int = 1
+    maximum: int = default_lands()
+    occurrences: int = default_occurrences()
     priorities: List[FilterAlias]
 
     @classmethod
     def from_string(
         cls,
         priorities: str,
-        maximum: int = 23,
-        occurrences: int = 4,
+        maximum: int = default_lands(),
+        occurrences: int = default_occurrences(),
     ) -> PriorityManager:
         """Build a priority manager from a string of space separated aliases.
 
@@ -35,7 +36,7 @@ class PriorityManager(BaseModel):
         >>> from manabase.priorities import PriorityManager
         >>> string = "original fetch"
         >>> PriorityManager.from_string(string)
-        PriorityManager(maximum=23, occurrences=4, priorities=[<FilterAlias.original: \
+        PriorityManager(maximum=37, occurrences=1, priorities=[<FilterAlias.original: \
 'original'>, <FilterAlias.fetch: 'fetch'>])
 
         ```
