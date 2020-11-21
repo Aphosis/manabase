@@ -91,6 +91,11 @@ class CardList(BaseModel):
             MaximumSizeExceeded: When you exceed the `CardList.maximum` size
                 fixed.
         """
+        if (self.available - occurrences) < 0:
+            raise MaximumSizeExceeded(
+                f"This card list is limited to {self.maximum} cards."
+            )
+
         existing = self.by_name(card.name)
 
         if not existing:
@@ -98,11 +103,6 @@ class CardList(BaseModel):
             self.entries_by_name[entry.name] = entry
             self.entries.append(entry)
             existing = entry
-
-        if (self.available - occurrences) < 0:
-            raise MaximumSizeExceeded(
-                f"This card list is limited to {self.maximum} cards."
-            )
 
         existing.occurrences += occurrences
 
